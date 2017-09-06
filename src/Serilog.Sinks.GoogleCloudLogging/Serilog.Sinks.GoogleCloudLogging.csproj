@@ -1,7 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard1.5</TargetFramework>
+    <Description>Serilog sink that writes events to Google Cloud Platform Stackdriver Logging.</Description>
+    <PackageLicenseUrl>https://github.com/manigandham/serilog-sinks-googlecloudlogging/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/manigandham/serilog-sinks-googlecloudlogging</PackageProjectUrl>
+    <Authors>Mani Gandham</Authors>
+    <Company></Company>
+    <PackageTags>serilog; sink; google cloud; stackdriver; logging;</PackageTags>
+    <IncludeSymbols>true</IncludeSymbols>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageIconUrl>https://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
   </PropertyGroup>
 
   <ItemGroup>
