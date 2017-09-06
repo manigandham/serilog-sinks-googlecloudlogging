@@ -2,7 +2,7 @@
 
 Serilog sink that writes events to [Google Cloud Platform Stackdriver Logging](https://cloud.google.com/logging/).
 
-## Getting started
+### Getting started
 
 Install from Nuget:
 
@@ -16,8 +16,9 @@ var log = new LoggerConfiguration()
     .CreateLogger();
 ```
 
-Sink options:
-- Project ID - **Required** Google Cloud project ID which will hold logs.
-- Resource Type - Resource type for logs, defaults to "global".
-- Log Name - Name of individual log, will use SourceContext from Serilog automatically or fallback to this setting, defaults to "Default".
-- Labels - Dictionary of string keys and values added to all logs. Individual log entries will automatically add `Properties` from Serilog events.
+### Sink options:
+
+- **Project ID** - Required - Google Cloud project ID which will hold logs.
+- **Resource Type** - Resource type for logs, defaults to "global".
+- **Log Name** - Name of individual log, will use SourceContext from Serilog automatically or fallback to this setting, defaults to "Default".
+- **Labels** - Dictionary of string keys and values added to all logs. Individual log entries will automatically add `Properties` from Serilog events.
