@@ -20,4 +20,4 @@ Sink options:
 - Project ID - **Required** Google Cloud project ID which will hold logs.
 - Resource Type - Resource type for logs, defaults to "global".
 - Log Name - Name of individual log, will use SourceContext from Serilog automatically or fallback to this setting, defaults to "Default".
-
+- Labels - Dictionary of string keys and values added to all logs. Individual log entries will automatically add `Properties` from Serilog events.
