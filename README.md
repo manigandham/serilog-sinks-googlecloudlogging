@@ -4,7 +4,7 @@ Serilog sink that writes events to [Google Cloud Platform Stackdriver Logging](h
 
 ### Getting started
 
-Install from Nuget:
+Install [package](https://www.nuget.org/packages/Serilog.Sinks.GoogleCloudLogging/) from Nuget:
 
      Install-Package Serilog.Sinks.GoogleCloudLogging
 
