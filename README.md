@@ -22,11 +22,11 @@ var log = new LoggerConfiguration()
 
 Name | Description
 ------------ | -------------
-Project ID | Required - Google Cloud project ID where logs will be sent to.
-Resource Type | Resource type for logs, defaults to "global".
-Log Name | Name of log. Will automatically use SourceContext from Serilog events or fallback to this setting, defaults to "Default".
-Labels | Dictionary of string keys and values added to all logs. Individual log entries will automatically add `Properties` from Serilog events.
+`ProjectId` | Required - Google Cloud project ID where logs will be sent to.
+`ResourceType` | Resource type for logs, defaults to "global".
+`LogName` | Name of log. Will automatically use SourceContext from Serilog events or fallback to this setting, defaults to "Default".
+`Labels` | Dictionary of string keys and values added to all logs. Individual log entries will automatically add `Properties` from Serilog events.
 
-Using defaults will show logs with these settings in the GCP Console:
+When using default options, logs will appear under these filter settings in the GCP Console:
 
 ![](https://i.imgur.com/azT3uDE.png)
