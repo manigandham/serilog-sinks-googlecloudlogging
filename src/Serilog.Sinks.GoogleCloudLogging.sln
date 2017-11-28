@@ -1,8 +1,9 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.3
+VisualStudioVersion = 15.0.27004.2010
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.GoogleCloudLogging", "Serilog.Sinks.GoogleCloudLogging\Serilog.Sinks.GoogleCloudLogging.csproj", "{0F81D373-2221-42EE-9B64-8D2A4FC14696}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.GoogleCloudLogging", "Serilog.Sinks.GoogleCloudLogging\Serilog.Sinks.GoogleCloudLogging.csproj", "{0F81D373-2221-42EE-9B64-8D2A4FC14696}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
