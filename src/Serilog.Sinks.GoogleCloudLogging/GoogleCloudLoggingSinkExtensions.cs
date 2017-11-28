@@ -15,7 +15,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 messageTemplateTextFormatter,
                 batchSizeLimit ?? 100,
                 period ?? TimeSpan.FromSeconds(5)
-                );
+            );
 
             return loggerConfiguration.Sink(sink);
         }

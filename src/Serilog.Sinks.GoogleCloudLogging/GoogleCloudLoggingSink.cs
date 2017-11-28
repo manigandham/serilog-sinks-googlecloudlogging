@@ -60,19 +60,43 @@ namespace Serilog.Sinks.GoogleCloudLogging
                     entry.TextPayload = e.RenderMessage();
                 }
 
-                foreach (var property in e.Properties)
-                {
-                    var value = ((ScalarValue) property.Value).Value.ToString();
-                    entry.Labels.Add(property.Key, value);
-
-                    if (property.Key.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
-                        entry.LogName = new LogName(_sinkOptions.ProjectId, value).ToString();
-                }
+                WriteProperties(entry, e.Properties);
 
                 logEntries.Add(entry);
             }
 
             await _client.WriteLogEntriesAsync(_logNameToWrite, _resource, _sinkOptions.Labels, logEntries);
+        }
+
+        private void WriteProperties(LogEntry entry, IReadOnlyDictionary<string, LogEventPropertyValue> properties)
+        {
+            foreach (var property in properties)
+            {
+                switch (property.Value)
+                {
+                    case ScalarValue scalarValue:
+                        {
+                            // google cloud logging does not support null values, will write empty string instead to preserve keys as labels
+                            var value = scalarValue.Value?.ToString() ?? string.Empty;
+                            entry.Labels.Add(property.Key, value);
+
+                            if (property.Key.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
+                                entry.LogName = new LogName(_sinkOptions.ProjectId, value).ToString();
+
+                            break;
+                        }
+                    case StructureValue structureValue when structureValue.Properties.Count > 0:
+                        {
+                            // child properties will be prefixed with parent property name as "parentkey.childkey" similar to json path.
+                            var dict = new Dictionary<string, LogEventPropertyValue>();
+                            foreach (var childProperty in structureValue.Properties)
+                                dict[property.Key + "." + childProperty.Name] = childProperty.Value;
+
+                            WriteProperties(entry, dict);
+                            break;
+                        }
+                }
+            }
         }
 
         private LogSeverity TranslateSeverity(LogEventLevel level)
