@@ -20,12 +20,12 @@ var log = new LoggerConfiguration()
 
 ### Sink options:
 
-Name | Description
------------- | -------------
-`ProjectId` | Required - Google Cloud project ID where logs will be sent to.
-`ResourceType` | Resource type for logs, defaults to "global".
-`LogName` | Name of log. Will automatically use SourceContext from Serilog events or fallback to this setting, defaults to "Default".
-`Labels` | Dictionary of string keys and values added to all logs. Individual log entries will automatically add `Properties` from Serilog events.
+Name | Description | Default
+---- | ----------- | -------
+`ProjectId` | Required - Google Cloud project ID where logs will be sent to. |
+`ResourceType` | Resource type for logs. Must be one of the supported types listed in the  [cloud logging documentation](https://cloud.google.com/logging/docs/api/v2/resource-list). | global
+`LogName` | Name of log under the resource type. Will automatically use SourceContext from Serilog events or fallback to this setting. | Default
+`Labels` | Dictionary of string keys and values added to all logs. Individual log entries will automatically include `Properties` from Serilog events. |
 
 When using default options, logs will appear under these filter settings in the GCP Console:
 
