@@ -24,8 +24,9 @@ Name | Description | Default
 ---- | ----------- | -------
 `ProjectId` | Required - Google Cloud project ID where logs will be sent to. |
 `ResourceType` | Resource type for logs. Must be one of the supported types listed in the  [cloud logging documentation](https://cloud.google.com/logging/docs/api/v2/resource-list). | global
-`LogName` | Name of log under the resource type. Will automatically use SourceContext from Serilog events or fallback to this setting. | Default
+`LogName` | Name of log under the resource type. | Default
 `Labels` | Dictionary of string keys and values added to all logs. Individual log entries will automatically include `Properties` from Serilog events. |
+`UseSourceContextAsLogName` | The log name for a log entry will be set to the [SourceContext](https://github.com/serilog/serilog/wiki/Writing-Log-Events#source-contexts) property if it's available. | True
 
 When using default options, logs will appear under these filter settings in the GCP Console:
 
