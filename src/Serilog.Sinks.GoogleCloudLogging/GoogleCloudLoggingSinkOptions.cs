@@ -10,6 +10,12 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public Dictionary<string, string> Labels { get; } = new Dictionary<string, string>();
 
         /// <summary>
+        /// If a log entry includes a `SourceContext` property (usually created from a log created with a context) then it will be used as the name of the log.
+        /// Defaults to true. Disable to always use custom log name setup in options.
+        /// </summary>
+        public bool UseSourceContextAsLogName { get; set; } = true;
+
+        /// <summary>
         /// Options for Google Cloud Logging
         /// </summary>
         /// <param name="projectId">ID of project where logs will be sent.</param>

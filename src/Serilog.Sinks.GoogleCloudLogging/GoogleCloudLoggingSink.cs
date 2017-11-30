@@ -80,7 +80,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                             var value = scalarValue.Value?.ToString() ?? string.Empty;
                             entry.Labels.Add(property.Key, value);
 
-                            if (property.Key.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
+                            if (_sinkOptions.UseSourceContextAsLogName && property.Key.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
                                 entry.LogName = new LogName(_sinkOptions.ProjectId, value).ToString();
 
                             break;
