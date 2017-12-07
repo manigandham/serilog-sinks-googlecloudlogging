@@ -18,6 +18,8 @@ var log = new LoggerConfiguration()
     .CreateLogger();
 ```
 
+This library uses the [`Google-Cloud-Dotnet`](https://googlecloudplatform.github.io/google-cloud-dotnet/) libraries which authenticate using the default service account on the machine. This is automatic on GCE VMs or you can use the [`gcloud`](https://cloud.google.com/sdk/) SDK to authenticate yourself. The service account must have the [`Logs Writer`](https://cloud.google.com/logging/docs/access-control) permission to send logs.
+
 ### Sink options:
 
 Name | Description | Default
