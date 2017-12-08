@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Google.Api;
 using Google.Cloud.Logging.Type;
@@ -93,6 +94,15 @@ namespace Serilog.Sinks.GoogleCloudLogging
                                 dict[property.Key + "." + childProperty.Name] = childProperty.Value;
 
                             WriteProperties(entry, dict);
+                            break;
+                        }
+                    case DictionaryValue dictionary when dictionary.Elements.Count > 0:
+                        {
+                            WriteProperties(entry, dictionary.Elements
+                                .ToDictionary(k => property.Key + "."
+                                    + k.Key.ToString().Replace("\"", string.Empty) // remove " surrounding child keys
+                                    , v => v.Value));
+
                             break;
                         }
                 }
