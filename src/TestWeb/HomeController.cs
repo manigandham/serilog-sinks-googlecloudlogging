@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -24,8 +25,11 @@ namespace TestWeb
             _logger.LogInformation("Testing info message with ILogger abstraction");
             _logger.LogDebug("Testing debug message with ILogger abstraction");
             _logger.LogDebug(eventId: new Random().Next(), message: "Testing message with random event ID");
-            _logger.LogInformation("Test message with a Dictionary {myDict}", new Dictionary<string, string> { { "myKey", "myValue" },
-                { "mySecondKey", "withAValue" } });
+            _logger.LogInformation("Test message with a Dictionary {myDict}", new Dictionary<string, string>
+            {
+                { "myKey", "myValue" },
+                { "mySecondKey", "withAValue" }
+            });
 
             // ASP.NET Logger Factor accepts string log names, but these must follow the rules for Google Cloud logging:
             // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
