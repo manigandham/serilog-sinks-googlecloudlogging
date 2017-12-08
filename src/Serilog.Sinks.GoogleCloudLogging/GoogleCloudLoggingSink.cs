@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Google.Api;
 using Google.Cloud.Logging.Type;
@@ -69,6 +70,13 @@ namespace Serilog.Sinks.GoogleCloudLogging
             await _client.WriteLogEntriesAsync(_logNameToWrite, _resource, _sinkOptions.Labels, logEntries);
         }
 
+        /// <summary>
+        /// Writes event properties as labels for GCP log entry.
+        /// GCP log labels are a flat key/value namespace so all child event properties will be prefixed with parent property names "parentkey.childkey" similar to json path.
+        /// Scalar and sequence values will be written even if values are empty so that key names are still logged as labels.
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="properties"></param>
         private void WriteProperties(LogEntry entry, IReadOnlyDictionary<string, LogEventPropertyValue> properties)
         {
             foreach (var property in properties)
@@ -86,23 +94,28 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
                             break;
                         }
+                    case SequenceValue sequenceValue:
+                        {
+                            var value = String.Join(",", sequenceValue.Elements);
+                            entry.Labels.Add(property.Key, value);
+                            break;
+                        }
                     case StructureValue structureValue when structureValue.Properties.Count > 0:
                         {
-                            // child properties will be prefixed with parent property name as "parentkey.childkey" similar to json path.
-                            var dict = new Dictionary<string, LogEventPropertyValue>();
+                            var dict = new Dictionary<string, LogEventPropertyValue>(structureValue.Properties.Count);
                             foreach (var childProperty in structureValue.Properties)
                                 dict[property.Key + "." + childProperty.Name] = childProperty.Value;
 
                             WriteProperties(entry, dict);
                             break;
                         }
-                    case DictionaryValue dictionary when dictionary.Elements.Count > 0:
+                    case DictionaryValue dictionaryValue when dictionaryValue.Elements.Count > 0:
                         {
-                            WriteProperties(entry, dictionary.Elements
-                                .ToDictionary(k => property.Key + "."
-                                    + k.Key.ToString().Replace("\"", string.Empty) // remove " surrounding child keys
-                                    , v => v.Value));
+                            var dict = new Dictionary<string, LogEventPropertyValue>(dictionaryValue.Elements.Count);
+                            foreach (var kv in dictionaryValue.Elements)
+                                dict[property.Key + "." + kv.Key.ToString().Replace("\"", string.Empty)] = kv.Value;
 
+                            WriteProperties(entry, dict);
                             break;
                         }
                 }
