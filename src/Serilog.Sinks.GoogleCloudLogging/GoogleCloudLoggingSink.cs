@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Google.Api;
 using Google.Cloud.Logging.Type;
@@ -62,7 +60,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
                     entry.TextPayload = e.RenderMessage();
                 }
 
-                WriteProperties(entry, e.Properties);
+                foreach (var property in e.Properties)
+                    WriteProperty(entry, property.Key, property.Value);
 
                 logEntries.Add(entry);
             }
@@ -75,50 +74,42 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// GCP log labels are a flat key/value namespace so all child event properties will be prefixed with parent property names "parentkey.childkey" similar to json path.
         /// Scalar and sequence values will be written even if values are empty so that key names are still logged as labels.
         /// </summary>
-        /// <param name="entry"></param>
-        /// <param name="properties"></param>
-        private void WriteProperties(LogEntry entry, IReadOnlyDictionary<string, LogEventPropertyValue> properties)
+        private void WriteProperty(LogEntry entry, string propertyKey, LogEventPropertyValue propertyValue)
         {
-            foreach (var property in properties)
+            switch (propertyValue)
             {
-                switch (property.Value)
-                {
-                    case ScalarValue scalarValue:
-                        {
-                            // google cloud logging does not support null values, will write empty string instead to preserve keys as labels
-                            var value = scalarValue.Value?.ToString() ?? string.Empty;
-                            entry.Labels.Add(property.Key, value);
+                case ScalarValue scalarValue:
+                    {
+                        // google cloud logging does not support null values, will write empty string instead to preserve keys as labels
+                        var value = scalarValue.Value?.ToString() ?? string.Empty;
+                        entry.Labels.Add(propertyKey, value);
 
-                            if (_sinkOptions.UseSourceContextAsLogName && property.Key.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
-                                entry.LogName = new LogName(_sinkOptions.ProjectId, value).ToString();
+                        if (_sinkOptions.UseSourceContextAsLogName && propertyKey.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
+                            entry.LogName = new LogName(_sinkOptions.ProjectId, value).ToString();
 
-                            break;
-                        }
-                    case SequenceValue sequenceValue:
-                        {
-                            var value = String.Join(",", sequenceValue.Elements);
-                            entry.Labels.Add(property.Key, value);
-                            break;
-                        }
-                    case StructureValue structureValue when structureValue.Properties.Count > 0:
-                        {
-                            var dict = new Dictionary<string, LogEventPropertyValue>(structureValue.Properties.Count);
-                            foreach (var childProperty in structureValue.Properties)
-                                dict[property.Key + "." + childProperty.Name] = childProperty.Value;
+                        break;
+                    }
+                case SequenceValue sequenceValue:
+                    {
+                        var value = String.Join(",", sequenceValue.Elements);
+                        entry.Labels.Add(propertyKey, value);
 
-                            WriteProperties(entry, dict);
-                            break;
-                        }
-                    case DictionaryValue dictionaryValue when dictionaryValue.Elements.Count > 0:
-                        {
-                            var dict = new Dictionary<string, LogEventPropertyValue>(dictionaryValue.Elements.Count);
-                            foreach (var kv in dictionaryValue.Elements)
-                                dict[property.Key + "." + kv.Key.ToString().Replace("\"", string.Empty)] = kv.Value;
+                        break;
+                    }
+                case StructureValue structureValue when structureValue.Properties.Count > 0:
+                    {
+                        foreach (var childProperty in structureValue.Properties)
+                            WriteProperty(entry, propertyKey + "." + childProperty.Name, childProperty.Value);
 
-                            WriteProperties(entry, dict);
-                            break;
-                        }
-                }
+                        break;
+                    }
+                case DictionaryValue dictionaryValue when dictionaryValue.Elements.Count > 0:
+                    {
+                        foreach (var kv in dictionaryValue.Elements)
+                            WriteProperty(entry, propertyKey + "." + kv.Key.ToString().Replace("\"", string.Empty), kv.Value);
+
+                        break;
+                    }
             }
         }
 
