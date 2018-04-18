@@ -17,7 +17,7 @@ namespace TestWeb
             _loggerFactory = loggerFactory;
         }
 
-        public string Index()
+        public IActionResult Index()
         {
             Log.Information("Test info message with serilog");
             Log.Debug("Test debug message with serilog");
@@ -33,13 +33,15 @@ namespace TestWeb
                 { "mySecondKey", "withAValue" }
             });
 
-            // ASP.NET Logger Factor accepts string log names, but these must follow the rules for Google Cloud logging:
+            // ASP.NET Logger Factory accepts custom log names but these must follow the rules for Google Cloud logging:
             // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
             // Names must only include upper and lower case alphanumeric characters, forward-slash, underscore, hyphen, and period. No spaces!
             var logger = _loggerFactory.CreateLogger("AnotherLogger");
-            logger.LogInformation("Test info message with ILoggerFactor abstraction and custom log name");
+            logger.LogInformation("Test info message with ILoggerFactory abstraction and custom log name");
 
-            return $"Logged messages, visit GCP log viewer at https://console.cloud.google.com/logs/viewer?project={Program.GCP_PROJECT_ID}";
+            var url = $"https://console.cloud.google.com/logs/viewer?project={Program.GCP_PROJECT_ID}";
+            var page = $"<html><body>Logged messages, visit GCP log viewer at <a href='{url}'>{url}</a></body></html>";
+            return Content(page, "text/html");
         }
     }
 }
