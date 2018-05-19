@@ -26,11 +26,12 @@ namespace TestWeb
             _logger.LogDebug("Test debug message with ILogger abstraction");
 
             _logger.LogInformation(eventId: new Random().Next(), message: "Testing message with random event ID");
-            _logger.LogInformation("Test message with List {list}", new List<string> { "foo", "123", "bar", "456" });
-            _logger.LogInformation("Test message with Dictionary {dict}", new Dictionary<string, string>
+            _logger.LogInformation("Test message with string List {list}", new List<string> { "foo", "bar", "pizza" });
+            _logger.LogInformation("Test message with int List {list}", new List<int> { 123, 456, 7890 });
+            _logger.LogInformation("Test message with object Dictionary {dict}", new Dictionary<string, object>
             {
-                { "myKey", "myValue" },
-                { "mySecondKey", "withAValue" }
+                { "firstKeyWithString", "qwerty" },
+                { "secondKeyWithNumber", 12345 }
             });
 
             // ASP.NET Logger Factory accepts custom log names but these must follow the rules for Google Cloud logging:
