@@ -11,9 +11,16 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
         /// <summary>
         /// If a log entry includes a `SourceContext` property (usually created from a log created with a context) then it will be used as the name of the log.
-        /// Defaults to true. Disable to always use custom log name setup in options.
+        /// Defaults to true. Disable to always use the `LogName` as set in options.
         /// </summary>
         public bool UseSourceContextAsLogName { get; set; } = true;
+
+        /// <summary>
+        /// Logs are normally sent as a formatted line of text with attached properties serialized as a flat list of string labels.
+        /// This option allows for serializing the log and properties as a JSON object instead, to maintain data types and structure as much as possible for richer querying within GCP Log Viewer.
+        /// Defaults to false.
+        /// </summary>
+        public bool UseJsonOutput { get; set; } = false;
 
         /// <summary>
         /// Options for Google Cloud Logging

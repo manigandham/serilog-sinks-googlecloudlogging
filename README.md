@@ -7,10 +7,10 @@ Serilog sink that writes events to [Google Cloud Platform Stackdriver Logging](h
 Install [package](https://www.nuget.org/packages/Serilog.Sinks.GoogleCloudLogging/) from Nuget:
 
 ```
-   Install-Package Serilog.Sinks.GoogleCloudLogging
+Install-Package Serilog.Sinks.GoogleCloudLogging
 ```
 
-Configure logger:
+Configure Logger:
 
 ```csharp
 var log = new LoggerConfiguration()
@@ -18,18 +18,29 @@ var log = new LoggerConfiguration()
     .CreateLogger();
 ```
 
-This library uses the [`Google-Cloud-Dotnet`](https://googlecloudplatform.github.io/google-cloud-dotnet/) libraries which authenticate using the default service account on the machine. This is automatic on GCE VMs or you can use the [`gcloud`](https://cloud.google.com/sdk/) SDK to authenticate yourself. The service account must have the [`Logs Writer`](https://cloud.google.com/logging/docs/access-control) permission to send logs.
+This library uses the [`Google-Cloud-Dotnet`](https://googlecloudplatform.github.io/google-cloud-dotnet/) libraries which authenticate using the default service account on the machine. This is automatic on GCE VMs or you can use the [`gcloud`](https://cloud.google.com/sdk/) SDK to authenticate manually. The service account must have the [`Logs Writer`](https://cloud.google.com/logging/docs/access-control) permission to send logs.
 
-### Sink options:
+### Sink Options
 
-Name | Description | Default
----- | ----------- | -------
-`ProjectId` | Required - Google Cloud project ID where logs will be sent to. |
-`ResourceType` | Resource type for logs. Must be one of the supported types listed in the  [cloud logging documentation](https://cloud.google.com/logging/docs/api/v2/resource-list). | global
-`LogName` | Name of log under the resource type. | Default
-`Labels` | Dictionary of string keys and values added to all logs. Individual log entries will automatically include `Properties` from Serilog events. |
-`UseSourceContextAsLogName` | The log name for a log entry will be set to the [SourceContext](https://github.com/serilog/serilog/wiki/Writing-Log-Events#source-contexts) property if it's available. | True
+Name | Required | Default | Description
+---- | -------- | ------- | -----------
+`ProjectId` | Yes | | Google Cloud project ID where logs will be sent to. 
+`ResourceType` | Yes | global | Resource type for all log output. Must be one of the supported types listed in the  [cloud logging documentation](https://cloud.google.com/logging/docs/api/v2/resource-list).
+`LogName` | Yes | Default | Name of log under the resource type.
+`Labels` | | | Dictionary of string keys and values to be added to all log entries.
+`UseSourceContextAsLogName` | | True | The log name for a log entry will be set to the [SourceContext](https://github.com/serilog/serilog/wiki/Writing-Log-Events#source-contexts) property if it's available.
+`UseJsonOutput` | | False | Structured logging can be sent as text with labels or as a JSON object, details below.
 
-When using default options, logs will appear under these filter settings in the GCP Console:
+### Output Type
+
+Serilog has structured logging, with each log statement having a formatting template, attached properties, and the final output. When `UseJsonOutput` is false, the final output is rendered as the `TextPayload` in GCP logs with any properties serialized as string key/value labels.
+
+To maintain the datatypes and structure as much as possible, set `UseJsonOutput` to true and the log statement will be serialized and sent as the `JsonPayload` in GCP logs. This is slightly slower but especially helpful for querying child properties or numbers in the Log Viewer.
+
+### Viewing Logs
+
+Logs will appear in the Google Cloud Console Log Viewer: https://console.cloud.google.com/logs/viewer
+
+When using default options, logs will appear under these filter settings:
 
 ![](https://i.imgur.com/azT3uDE.png)
