@@ -33,9 +33,9 @@ Name | Required | Default | Description
 
 ### Output Type
 
-Serilog has structured logging, with each log statement having a formatting template, attached properties, and the final output. When `UseJsonOutput` is false, the final output is rendered as the `TextPayload` in GCP logs with any properties serialized as string key/value labels.
+Serilog uses structured logging so each log statement has a formatting template with attached properties which are then combined to create the final output. When `UseJsonOutput` is false, the final output is rendered as the `TextPayload` in GCP logs with any properties serialized as string key/value labels.
 
-To maintain the datatypes and structure as much as possible, set `UseJsonOutput` to true and the log statement will be serialized and sent as the `JsonPayload` in GCP logs. This is slightly slower but especially helpful for querying child properties or numbers in the Log Viewer.
+To maintain the datatypes and structure as much as possible, set `UseJsonOutput` to true and the log statement will be serialized and sent as the `JsonPayload` instead. This is slightly slower but helpful for querying child properties or numbers in the Log Viewer, and will also capture property names when they have null values.
 
 ### Viewing Logs
 

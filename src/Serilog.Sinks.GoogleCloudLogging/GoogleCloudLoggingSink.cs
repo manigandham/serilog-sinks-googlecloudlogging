@@ -93,25 +93,36 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
         /// <summary>
         /// Writes event properties as a JSON object for a GCP log entry.
-        /// Scalar and sequence properties will be written even if values are empty so that key names are still logged.
         /// </summary>
         private void WritePropertyAsJson(LogEntry log, Struct jsonStruct, string propertyKey, LogEventPropertyValue propertyValue)
         {
             switch (propertyValue)
             {
-                case ScalarValue scalarValue when scalarValue.Value is string:
+                case ScalarValue scalarValue when scalarValue.Value is null:
                     {
-                        var stringValue = scalarValue.Value?.ToString() ?? "";
+                        jsonStruct.Fields.Add(propertyKey, Value.ForNull());
+
+                        break;
+                    }
+                case ScalarValue scalarValue when scalarValue.Value is bool:
+                    {
+                        jsonStruct.Fields.Add(propertyKey, Value.ForBool(Convert.ToBoolean(scalarValue.Value)));
+
+                        break;
+                    }
+                case ScalarValue scalarValue when Double.TryParse(scalarValue.Value?.ToString(), out var doubleValue):
+                    {
+                        jsonStruct.Fields.Add(propertyKey, Value.ForNumber(doubleValue));
+
+                        break;
+                    }
+                case ScalarValue scalarValue:
+                    {
+                        var stringValue = scalarValue.Value.ToString();
                         jsonStruct.Fields.Add(propertyKey, Value.ForString(stringValue));
 
                         if (_sinkOptions.UseSourceContextAsLogName && propertyKey.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
                             log.LogName = new LogName(_sinkOptions.ProjectId, stringValue).ToString();
-
-                        break;
-                    }
-                case ScalarValue scalarValue when Double.TryParse(scalarValue.Value?.ToString() ?? "", out var doubleValue):
-                    {
-                        jsonStruct.Fields.Add(propertyKey, Value.ForNumber(doubleValue));
 
                         break;
                     }
@@ -152,15 +163,20 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <summary>
         /// Writes event properties as labels for a GCP log entry.
         /// GCP log labels are a flat key/value namespace so all child event properties will be prefixed with parent property names "parentkey.childkey" similar to json path.
-        /// Scalar and sequence properties will be written even if values are empty so that key names are still logged.
         /// </summary>
         private void WritePropertyAsLabel(LogEntry log, string propertyKey, LogEventPropertyValue propertyValue)
         {
             switch (propertyValue)
             {
+                case ScalarValue scalarValue when scalarValue.Value is null:
+                    {
+                        log.Labels.Add(propertyKey, null);
+
+                        break;
+                    }
                 case ScalarValue scalarValue:
                     {
-                        var stringValue = scalarValue.Value?.ToString() ?? "";
+                        var stringValue = scalarValue.Value.ToString();
                         log.Labels.Add(propertyKey, stringValue);
 
                         if (_sinkOptions.UseSourceContextAsLogName && propertyKey.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
