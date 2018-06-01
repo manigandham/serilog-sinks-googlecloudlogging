@@ -170,7 +170,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             {
                 case ScalarValue scalarValue when scalarValue.Value is null:
                     {
-                        log.Labels.Add(propertyKey, null);
+                        log.Labels.Add(propertyKey, string.Empty);
 
                         break;
                     }
