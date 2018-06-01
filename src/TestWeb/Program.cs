@@ -14,7 +14,9 @@ namespace TestWeb
 
         public static void Main(string[] args)
         {
-            Log.Logger = new LoggerConfiguration()
+			Serilog.Debugging.SelfLog.Enable(msg => Console.WriteLine(msg));
+
+			Log.Logger = new LoggerConfiguration()
                 .WriteTo.GoogleCloudLogging(new GoogleCloudLoggingSinkOptions(GCP_PROJECT_ID)) // Add this to send Serilog output to GCP
                 .CreateLogger();
 
