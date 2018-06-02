@@ -11,7 +11,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIconUrl>https://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
-    <Version>1.4.5</Version>
+    <Version>1.4.6</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore;
+﻿using System;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Serilog;
+using Serilog.Events;
 using Serilog.Sinks.GoogleCloudLogging;
 
 namespace TestWeb
@@ -14,10 +16,11 @@ namespace TestWeb
 
         public static void Main(string[] args)
         {
-			Serilog.Debugging.SelfLog.Enable(msg => Console.WriteLine(msg));
+            Serilog.Debugging.SelfLog.Enable(msg => Console.WriteLine(msg));
 
-			Log.Logger = new LoggerConfiguration()
+            Log.Logger = new LoggerConfiguration()
                 .WriteTo.GoogleCloudLogging(new GoogleCloudLoggingSinkOptions(GCP_PROJECT_ID)) // Add this to send Serilog output to GCP
+                .MinimumLevel.Is(LogEventLevel.Verbose) // Serilog defaults to Info level and above, use this to override
                 .CreateLogger();
 
             BuildWebHost(args).Run();

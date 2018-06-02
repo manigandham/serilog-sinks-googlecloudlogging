@@ -32,9 +32,9 @@ namespace TestWeb
             anotherLogger.LogInformation("Test message with ILoggerFactory abstraction and custom log name");
 
             _logger.LogInformation(eventId: new Random().Next(), message: "Test message with random event ID");
-            _logger.LogInformation("Test message with string List {list}", new List<string> { "foo", "bar", "pizza" });
-            _logger.LogInformation("Test message with int List {list}", new List<int> { 123, 456, 7890 });
-            _logger.LogInformation("Test message with object Dictionary {dict}", new Dictionary<string, object> {
+            _logger.LogInformation("Test message with List<string> {list}", new List<string> { "foo", "bar", "pizza" });
+            _logger.LogInformation("Test message with List<int> {list}", new List<int> { 123, 456, 7890 });
+            _logger.LogInformation("Test message with Dictionary<string,object> {dict}", new Dictionary<string, object> {
                 { "firstKeyWithString", "qwerty" },
                 { "secondKeyWithNumber", 12345 },
                 { "thirdKeyWithBool", true },
