@@ -28,6 +28,9 @@ namespace Serilog.Sinks.GoogleCloudLogging
             _sinkOptions = sinkOptions;
 
             _resource = new MonitoredResource { Type = sinkOptions.ResourceType };
+
+            AssignResourceLabelMappings();
+
             var ln = new LogName(sinkOptions.ProjectId, sinkOptions.LogName);
             _logName = ln.ToString();
             _logNameToWrite = LogNameOneof.From(ln);
@@ -159,7 +162,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
             }
         }
 
-
         /// <summary>
         /// Writes event properties as labels for a GCP log entry.
         /// GCP log labels are a flat key/value namespace so all child event properties will be prefixed with parent property names "parentkey.childkey" similar to json path.
@@ -218,6 +220,27 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 case LogEventLevel.Error: return LogSeverity.Error;
                 case LogEventLevel.Fatal: return LogSeverity.Critical;
                 default: return LogSeverity.Default;
+            }
+        }
+
+        private void AssignResourceLabelMappings()
+        {
+            if (_sinkOptions.ResourceLabelMappings != null && _sinkOptions.ResourceLabelMappings.Any())
+            {
+                foreach (var mappingItem in _sinkOptions.ResourceLabelMappings)
+                {
+                    if (string.IsNullOrWhiteSpace(mappingItem.Key) || string.IsNullOrWhiteSpace(mappingItem.Value)) continue;
+
+                    var environmentValue = Environment.GetEnvironmentVariable(mappingItem.Key);
+
+                    if (!string.IsNullOrWhiteSpace(environmentValue))
+                    {
+                        if (_resource.Labels.ContainsKey(mappingItem.Value))
+                            _resource.Labels[mappingItem.Value] = environmentValue;
+                        else
+                            _resource.Labels.Add(mappingItem.Value, environmentValue);
+                    }
+                }
             }
         }
     }
