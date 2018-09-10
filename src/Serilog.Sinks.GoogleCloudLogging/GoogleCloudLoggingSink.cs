@@ -28,6 +28,9 @@ namespace Serilog.Sinks.GoogleCloudLogging
             _sinkOptions = sinkOptions;
 
             _resource = new MonitoredResource { Type = sinkOptions.ResourceType };
+            foreach (var kvp in _sinkOptions.ResourceLabels)
+                _resource.Labels[kvp.Key] = kvp.Value;
+
             var ln = new LogName(sinkOptions.ProjectId, sinkOptions.LogName);
             _logName = ln.ToString();
             _logNameToWrite = LogNameOneof.From(ln);

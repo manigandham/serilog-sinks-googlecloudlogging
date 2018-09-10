@@ -8,6 +8,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public string ResourceType { get; } = "global";
         public string LogName { get; } = "Default";
         public Dictionary<string, string> Labels { get; } = new Dictionary<string, string>();
+        public Dictionary<string, string> ResourceLabels { get; } = new Dictionary<string, string>();
 
         /// <summary>
         /// If a log entry includes a `SourceContext` property (usually created from a log created with a context) then it will be used as the name of the log.
@@ -29,7 +30,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <param name="resourceType">Resource type for logs. Default is "global" which shows as "Global" in Google Cloud Console UI.</param>
         /// <param name="logName">Name of individual log, will use SourceContext property automatically from Serilog context if it's available or fallback to this setting. Default is "Default".</param>
         /// <param name="labels">Labels added to every log entry in addition to any properties for each statement.</param>
-        public GoogleCloudLoggingSinkOptions(string projectId, string resourceType = null, string logName = null, Dictionary<string, string> labels = null)
+        /// <param name="resourceLabels">Labels added as properties of the underlying resource for each statement.</param>
+        public GoogleCloudLoggingSinkOptions(string projectId, string resourceType = null, string logName = null, Dictionary<string, string> labels = null, Dictionary<string, string> resourceLabels = null)
         {
             ProjectId = projectId;
 
@@ -41,6 +43,9 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
             if (labels != null)
                 Labels = labels;
+
+            if (resourceLabels != null)
+                ResourceLabels = resourceLabels;
         }
     }
 }
