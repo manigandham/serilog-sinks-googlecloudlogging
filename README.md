@@ -27,7 +27,8 @@ Name | Required | Default | Description
 `ProjectId` | Yes | | Google Cloud project ID where logs will be sent to. 
 `ResourceType` | Yes | global | Resource type for all log output. Must be one of the supported types listed in the  [cloud logging documentation](https://cloud.google.com/logging/docs/api/v2/resource-list).
 `LogName` | Yes | Default | Name of log under the resource type.
-`Labels` | | | Dictionary of string keys and values to be added to all log entries.
+`Labels` | | | Dictionary<string, string> of properties added to all log entries.
+`ResourceLabels` | | | Dictionary<string, string> of properties added to all log entries, at the resource level.
 `UseSourceContextAsLogName` | | True | The log name for a log entry will be set to the [SourceContext](https://github.com/serilog/serilog/wiki/Writing-Log-Events#source-contexts) property if it's available.
 `UseJsonOutput` | | False | Structured logging can be sent as text with labels or as a JSON object, details below.
 
