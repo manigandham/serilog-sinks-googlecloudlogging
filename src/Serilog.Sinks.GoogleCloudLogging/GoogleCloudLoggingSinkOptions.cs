@@ -7,7 +7,15 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public string ProjectId { get; }
         public string ResourceType { get; } = "global";
         public string LogName { get; } = "Default";
+
+        /// <summary>
+        /// Additional custom labels added to all log entries.
+        /// </summary>
         public Dictionary<string, string> Labels { get; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Additional custom labels for the resource type added to all log entries.
+        /// </summary>
         public Dictionary<string, string> ResourceLabels { get; } = new Dictionary<string, string>();
 
         /// <summary>
@@ -29,8 +37,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <param name="projectId">ID of project where logs will be sent.</param>
         /// <param name="resourceType">Resource type for logs. Default is "global" which shows as "Global" in Google Cloud Console UI.</param>
         /// <param name="logName">Name of individual log, will use SourceContext property automatically from Serilog context if it's available or fallback to this setting. Default is "Default".</param>
-        /// <param name="labels">Labels added to every log entry in addition to any properties for each statement.</param>
-        /// <param name="resourceLabels">Labels added as properties of the underlying resource for each statement.</param>
+        /// <param name="labels">Additional custom labels added to all log entries.</param>
+        /// <param name="resourceLabels">Additional custom labels for the resource type added to all log entries.</param>
         public GoogleCloudLoggingSinkOptions(string projectId, string resourceType = null, string logName = null, Dictionary<string, string> labels = null, Dictionary<string, string> resourceLabels = null)
         {
             ProjectId = projectId;
@@ -42,10 +50,16 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 LogName = logName;
 
             if (labels != null)
-                Labels = labels;
+            {
+                foreach (var kvp in labels)
+                    Labels[kvp.Key] = kvp.Value;
+            }
 
             if (resourceLabels != null)
-                ResourceLabels = resourceLabels;
+            {
+                foreach (var kvp in resourceLabels)
+                    ResourceLabels[kvp.Key] = kvp.Value;
+            }
         }
     }
 }
