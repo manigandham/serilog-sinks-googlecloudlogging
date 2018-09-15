@@ -20,6 +20,8 @@ var log = new LoggerConfiguration()
 
 This library uses the [`Google-Cloud-Dotnet`](https://googlecloudplatform.github.io/google-cloud-dotnet/) libraries which authenticate using the default service account on the machine. This is automatic on GCE VMs or you can use the [`gcloud`](https://cloud.google.com/sdk/) SDK to authenticate manually. The service account must have the [`Logs Writer`](https://cloud.google.com/logging/docs/access-control) permission to send logs.
 
+---
+
 ### Sink Options
 
 Name | Required | Default | Description
@@ -32,11 +34,13 @@ Name | Required | Default | Description
 `UseSourceContextAsLogName` | | True | The log name for a log entry will be set to the [SourceContext](https://github.com/serilog/serilog/wiki/Writing-Log-Events#source-contexts) property if it's available.
 `UseJsonOutput` | | False | Structured logging can be sent as text with labels or as a JSON object, details below.
 
-### Output Type
+#### Output Type
 
-Serilog uses structured logging so each log statement has a formatting template with attached properties which are then combined to create the final output. When `UseJsonOutput` is false, the final output is rendered as the `TextPayload` in GCP logs with any properties serialized as string key/value labels.
+Serilog uses structured logging, which means each log statement has a formatting template with attached properties that are combined to create the final output. When `UseJsonOutput` is false, the final output is sent as the `TextPayload` to GCP logs with any properties serialized as string key/value labels.
 
-To maintain the datatypes and structure as much as possible, set `UseJsonOutput` to true and the log statement will be serialized and sent as the `JsonPayload` instead. This is slightly slower but helpful for querying child properties or numbers in the Log Viewer, and will also capture property names when they have null values.
+If you want to maintain data types, set `UseJsonOutput` to true and the output will be sent as the `JsonPayload` with log structure intact as much as possible. This is slightly slower but helpful for querying child properties or numeric values in the Log Viewer, and will also capture property names even if they have null values.
+
+---
 
 ### Viewing Logs
 
