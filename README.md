@@ -10,13 +10,35 @@ Install [package](https://www.nuget.org/packages/Serilog.Sinks.GoogleCloudLoggin
 Install-Package Serilog.Sinks.GoogleCloudLogging
 ```
 
-Configure Logger:
+Configure Logger (In Code):
 
 ```csharp
 var log = new LoggerConfiguration()
     .WriteTo.GoogleCloudLogging(new GoogleCloudLoggingSinkOptions("YOUR_PROJECT_ID"))
     .CreateLogger();
 ```
+
+Configure Logger (In config file):
+
+This assumes that you are using ['serilog-settings-configuration'](https://github.com/serilog/serilog-settings-configuration) to allow you to load your sinks in via an appsettings.json file.
+
+appsettings.json:
+
+```json
+"Serilog": {
+    "Using": [ "Serilog.Sinks.GoogleCloudLogging" ],
+    "MinimumLevel": "Warning",
+    "WriteTo": [
+      { "Name":"GoogleCloudLogging", 
+        "Args":
+        {
+          "projectID": "YOUR_PROJECT_ID"
+        }
+      }
+    ]
+  }
+```
+
 
 This library uses the [`Google-Cloud-Dotnet`](https://googlecloudplatform.github.io/google-cloud-dotnet/) libraries which authenticate using the default service account on the machine. This is automatic on GCE VMs or you can use the [`gcloud`](https://cloud.google.com/sdk/) SDK to authenticate manually. The service account must have the [`Logs Writer`](https://cloud.google.com/logging/docs/access-control) permission to send logs.
 
