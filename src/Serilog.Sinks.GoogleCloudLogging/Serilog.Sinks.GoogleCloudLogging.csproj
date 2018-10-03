@@ -11,7 +11,7 @@
     <Authors>Mani Gandham</Authors>
     <IncludeSymbols>true</IncludeSymbols>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.4.7</Version>
+    <Version>1.4.8</Version>
   </PropertyGroup>
 
   <ItemGroup>
