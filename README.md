@@ -32,7 +32,8 @@ appsettings.json:
       { "Name":"GoogleCloudLogging", 
         "Args":
         {
-          "projectID": "YOUR_PROJECT_ID"
+          "projectID": "YOUR_PROJECT_ID",
+          "useJsonOutput": "true"
         }
       }
     ]
