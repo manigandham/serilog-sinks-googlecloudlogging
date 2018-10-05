@@ -102,63 +102,63 @@ namespace Serilog.Sinks.GoogleCloudLogging
             switch (propertyValue)
             {
                 case ScalarValue scalarValue when scalarValue.Value is null:
-                    {
-                        jsonStruct.Fields.Add(propertyKey, Value.ForNull());
+                {
+                    jsonStruct.Fields.Add(propertyKey, Value.ForNull());
 
-                        break;
-                    }
+                    break;
+                }
                 case ScalarValue scalarValue when scalarValue.Value is bool:
-                    {
-                        jsonStruct.Fields.Add(propertyKey, Value.ForBool(Convert.ToBoolean(scalarValue.Value)));
+                {
+                    jsonStruct.Fields.Add(propertyKey, Value.ForBool(Convert.ToBoolean(scalarValue.Value)));
 
-                        break;
-                    }
+                    break;
+                }
                 case ScalarValue scalarValue when Double.TryParse(scalarValue.Value?.ToString(), out var doubleValue):
-                    {
-                        jsonStruct.Fields.Add(propertyKey, Value.ForNumber(doubleValue));
+                {
+                    jsonStruct.Fields.Add(propertyKey, Value.ForNumber(doubleValue));
 
-                        break;
-                    }
+                    break;
+                }
                 case ScalarValue scalarValue:
-                    {
-                        var stringValue = scalarValue.Value.ToString();
-                        jsonStruct.Fields.Add(propertyKey, Value.ForString(stringValue));
+                {
+                    var stringValue = scalarValue.Value.ToString();
+                    jsonStruct.Fields.Add(propertyKey, Value.ForString(stringValue));
 
-                        if (_sinkOptions.UseSourceContextAsLogName && propertyKey.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
-                            log.LogName = new LogName(_sinkOptions.ProjectId, stringValue).ToString();
+                    if (_sinkOptions.UseSourceContextAsLogName && propertyKey.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
+                        log.LogName = new LogName(_sinkOptions.ProjectId, stringValue).ToString();
 
-                        break;
-                    }
+                    break;
+                }
                 case SequenceValue sequenceValue:
-                    {
-                        var childStruct = new Struct();
-                        for (int i = 0; i < sequenceValue.Elements.Count; i++)
-                            WritePropertyAsJson(log, childStruct, i.ToString(), sequenceValue.Elements[i]);
+                {
+                    var childStruct = new Struct();
+                    for (int i = 0; i < sequenceValue.Elements.Count; i++)
+                        WritePropertyAsJson(log, childStruct, i.ToString(), sequenceValue.Elements[i]);
 
-                        jsonStruct.Fields.Add(propertyKey, Value.ForList(childStruct.Fields.Values.ToArray()));
+                    jsonStruct.Fields.Add(propertyKey, Value.ForList(childStruct.Fields.Values.ToArray()));
 
-                        break;
-                    }
+                    break;
+                }
                 case StructureValue structureValue:
-                    {
-                        var childStruct = new Struct();
-                        foreach (var childProperty in structureValue.Properties)
-                            WritePropertyAsJson(log, childStruct, childProperty.Name, childProperty.Value);
+                {
+                    var childStruct = new Struct();
+                    foreach (var childProperty in structureValue.Properties)
+                        WritePropertyAsJson(log, childStruct, childProperty.Name, childProperty.Value);
 
-                        jsonStruct.Fields.Add(propertyKey, Value.ForStruct(childStruct));
+                    jsonStruct.Fields.Add(propertyKey, Value.ForStruct(childStruct));
 
-                        break;
-                    }
+                    break;
+                }
                 case DictionaryValue dictionaryValue:
-                    {
-                        var childStruct = new Struct();
-                        foreach (var childProperty in dictionaryValue.Elements)
-                            WritePropertyAsJson(log, childStruct, childProperty.Key.Value?.ToString(), childProperty.Value);
+                {
+                    var childStruct = new Struct();
+                    foreach (var childProperty in dictionaryValue.Elements)
+                        WritePropertyAsJson(log, childStruct, childProperty.Key.Value?.ToString(), childProperty.Value);
 
-                        jsonStruct.Fields.Add(propertyKey, Value.ForStruct(childStruct));
+                    jsonStruct.Fields.Add(propertyKey, Value.ForStruct(childStruct));
 
-                        break;
-                    }
+                    break;
+                }
             }
         }
 
@@ -172,41 +172,41 @@ namespace Serilog.Sinks.GoogleCloudLogging
             switch (propertyValue)
             {
                 case ScalarValue scalarValue when scalarValue.Value is null:
-                    {
-                        log.Labels.Add(propertyKey, String.Empty);
+                {
+                    log.Labels.Add(propertyKey, String.Empty);
 
-                        break;
-                    }
+                    break;
+                }
                 case ScalarValue scalarValue:
-                    {
-                        var stringValue = scalarValue.Value.ToString();
-                        log.Labels.Add(propertyKey, stringValue);
+                {
+                    var stringValue = scalarValue.Value.ToString();
+                    log.Labels.Add(propertyKey, stringValue);
 
-                        if (_sinkOptions.UseSourceContextAsLogName && propertyKey.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
-                            log.LogName = new LogName(_sinkOptions.ProjectId, stringValue).ToString();
+                    if (_sinkOptions.UseSourceContextAsLogName && propertyKey.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
+                        log.LogName = new LogName(_sinkOptions.ProjectId, stringValue).ToString();
 
-                        break;
-                    }
+                    break;
+                }
                 case SequenceValue sequenceValue:
-                    {
-                        log.Labels.Add(propertyKey, String.Join(",", sequenceValue.Elements));
+                {
+                    log.Labels.Add(propertyKey, String.Join(",", sequenceValue.Elements));
 
-                        break;
-                    }
+                    break;
+                }
                 case StructureValue structureValue when structureValue.Properties.Count > 0:
-                    {
-                        foreach (var childProperty in structureValue.Properties)
-                            WritePropertyAsLabel(log, propertyKey + "." + childProperty.Name, childProperty.Value);
+                {
+                    foreach (var childProperty in structureValue.Properties)
+                        WritePropertyAsLabel(log, propertyKey + "." + childProperty.Name, childProperty.Value);
 
-                        break;
-                    }
+                    break;
+                }
                 case DictionaryValue dictionaryValue when dictionaryValue.Elements.Count > 0:
-                    {
-                        foreach (var childProperty in dictionaryValue.Elements)
-                            WritePropertyAsLabel(log, propertyKey + "." + childProperty.Key.ToString().Replace("\"", ""), childProperty.Value);
+                {
+                    foreach (var childProperty in dictionaryValue.Elements)
+                        WritePropertyAsLabel(log, propertyKey + "." + childProperty.Key.ToString().Replace("\"", ""), childProperty.Value);
 
-                        break;
-                    }
+                    break;
+                }
             }
         }
 

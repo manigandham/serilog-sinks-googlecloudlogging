@@ -10,7 +10,7 @@ Install [package](https://www.nuget.org/packages/Serilog.Sinks.GoogleCloudLoggin
 Install-Package Serilog.Sinks.GoogleCloudLogging
 ```
 
-Configure Logger (In Code):
+Configure Logger (using code):
 
 ```csharp
 var log = new LoggerConfiguration()
@@ -18,11 +18,9 @@ var log = new LoggerConfiguration()
     .CreateLogger();
 ```
 
-Configure Logger (In config file):
+Configure Logger (using config file):
 
-This assumes that you are using ['serilog-settings-configuration'](https://github.com/serilog/serilog-settings-configuration) to allow you to load your sinks in via an appsettings.json file.
-
-appsettings.json:
+This assumes that you are using ['serilog-settings-configuration'](https://github.com/serilog/serilog-settings-configuration) to allow you to load your sinks in via an `appsettings.json` file.
 
 ```json
 "Serilog": {
@@ -40,6 +38,7 @@ appsettings.json:
   }
 ```
 
+GCP authentication:
 
 This library uses the [`Google-Cloud-Dotnet`](https://googlecloudplatform.github.io/google-cloud-dotnet/) libraries which authenticate using the default service account on the machine. This is automatic on GCE VMs or you can use the [`gcloud`](https://cloud.google.com/sdk/) SDK to authenticate manually. The service account must have the [`Logs Writer`](https://cloud.google.com/logging/docs/access-control) permission to send logs.
 
@@ -50,8 +49,8 @@ This library uses the [`Google-Cloud-Dotnet`](https://googlecloudplatform.github
 Name | Required | Default | Description
 ---- | -------- | ------- | -----------
 `ProjectId` | Yes | | Google Cloud project ID where logs will be sent to. 
-`ResourceType` | Yes | global | Resource type for all log output. Must be one of the supported types listed in the  [cloud logging documentation](https://cloud.google.com/logging/docs/api/v2/resource-list).
-`LogName` | Yes | Default | Name of log under the resource type.
+`ResourceType` | Yes | `global` | Resource type for all log output. Must be one of the supported types listed in the  [cloud logging documentation](https://cloud.google.com/logging/docs/api/v2/resource-list).
+`LogName` | Yes | `Default` | Name of log under the resource type.
 `Labels` | | | Dictionary<string, string> of properties added to all log entries.
 `ResourceLabels` | | | Dictionary<string, string> of properties added to all log entries, at the resource level.
 `UseSourceContextAsLogName` | | True | The log name for a log entry will be set to the [SourceContext](https://github.com/serilog/serilog/wiki/Writing-Log-Events#source-contexts) property if it's available.
