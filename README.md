@@ -2,15 +2,15 @@
 
 Serilog sink that writes events to [Google Cloud Platform Stackdriver Logging](https://cloud.google.com/logging/).
 
-### Getting started
+## Getting started
 
-Install [package](https://www.nuget.org/packages/Serilog.Sinks.GoogleCloudLogging/) from Nuget:
+#### Install [package](https://www.nuget.org/packages/Serilog.Sinks.GoogleCloudLogging/) from Nuget:
 
 ```
-Install-Package Serilog.Sinks.GoogleCloudLogging
+dotnet add package Serilog.Sinks.GoogleCloudLogging
 ```
 
-Configure Logger (using code):
+#### Configure Logger (using code):
 
 ```csharp
 var log = new LoggerConfiguration()
@@ -18,7 +18,7 @@ var log = new LoggerConfiguration()
     .CreateLogger();
 ```
 
-Configure Logger (using config file):
+#### Configure Logger (using config file):
 
 This assumes that you are using ['serilog-settings-configuration'](https://github.com/serilog/serilog-settings-configuration) to allow you to load your sinks in via an `appsettings.json` file.
 
@@ -38,13 +38,11 @@ This assumes that you are using ['serilog-settings-configuration'](https://githu
   }
 ```
 
-GCP authentication:
+#### GCP authentication:
 
 This library uses the [`Google-Cloud-Dotnet`](https://googlecloudplatform.github.io/google-cloud-dotnet/) libraries which authenticate using the default service account on the machine. This is automatic on GCE VMs or you can use the [`gcloud`](https://cloud.google.com/sdk/) SDK to authenticate manually. The service account must have the [`Logs Writer`](https://cloud.google.com/logging/docs/access-control) permission to send logs.
 
----
-
-### Sink Options
+## Sink Options
 
 Name | Required | Default | Description
 ---- | -------- | ------- | -----------
@@ -62,9 +60,7 @@ Serilog uses structured logging, which means each log statement has a formatting
 
 If you want to maintain data types, set `UseJsonOutput` to true and the output will be sent as the `JsonPayload` with log structure intact as much as possible. This is slightly slower but helpful for querying child properties or numeric values in the Log Viewer, and will also capture property names even if they have null values.
 
----
-
-### Viewing Logs
+## Viewing Logs
 
 Logs will appear in the Google Cloud Console Log Viewer: https://console.cloud.google.com/logs/viewer
 
