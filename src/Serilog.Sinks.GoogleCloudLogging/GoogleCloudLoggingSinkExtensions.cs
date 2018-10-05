@@ -19,5 +19,10 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
             return loggerConfiguration.Sink(sink);
         }
+
+        public static LoggerConfiguration GoogleCloudLogging(this LoggerSinkConfiguration loggerConfiguration, string projectID, bool useJsonOutput=false, int? batchSizeLimit = null, TimeSpan? period = null, string outputTemplate = null)
+        {
+            return loggerConfiguration.GoogleCloudLogging(new GoogleCloudLoggingSinkOptions(projectID){UseJsonOutput=useJsonOutput},batchSizeLimit,period,outputTemplate);
+        }
     }
 }
