@@ -66,4 +66,6 @@ Logs will appear in the Google Cloud Console Log Viewer: https://console.cloud.g
 
 When using default options, logs will appear under these filter settings:
 
-![](https://i.imgur.com/azT3uDE.png)
+
+
+![](https://i.imgur.com/3lk1LLM.png)
