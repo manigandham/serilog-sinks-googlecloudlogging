@@ -13,14 +13,13 @@ dotnet add package Serilog.Sinks.GoogleCloudLogging
 #### Configure Logger (using code):
 
 ```csharp
-var log = new LoggerConfiguration()
-    .WriteTo.GoogleCloudLogging(new GoogleCloudLoggingSinkOptions("YOUR_PROJECT_ID"))
-    .CreateLogger();
+var config = new GoogleCloudLoggingSinkOptions("YOUR_PROJECT_ID");
+var log = new LoggerConfiguration().WriteTo.GoogleCloudLogging(config).CreateLogger();
 ```
 
 #### Configure Logger (using config file):
 
-This assumes that you are using ['serilog-settings-configuration'](https://github.com/serilog/serilog-settings-configuration) to allow you to load your sinks in via an `appsettings.json` file.
+This assumes that you are using ['serilog-settings-configuration'](https://github.com/serilog/serilog-settings-configuration) to allow you to load your sinks in via an `appsettings.json` file. This *only* supports `projectId` and `useJsonOutput` settings.
 
 ```json
 "Serilog": {
