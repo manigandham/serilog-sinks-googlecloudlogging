@@ -7,6 +7,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public string ProjectId { get; }
         public string ResourceType { get; } = "global";
         public string LogName { get; } = "Default";
+        public string GoogleCredentialJson { get; } 
 
         /// <summary>
         /// Additional custom labels added to all log entries.
@@ -39,9 +40,10 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <param name="logName">Name of individual log, will use SourceContext property automatically from Serilog context if it's available or fallback to this setting. Default is "Default".</param>
         /// <param name="labels">Additional custom labels added to all log entries.</param>
         /// <param name="resourceLabels">Additional custom labels for the resource type added to all log entries.</param>
-        public GoogleCloudLoggingSinkOptions(string projectId, string resourceType = null, string logName = null, Dictionary<string, string> labels = null, Dictionary<string, string> resourceLabels = null)
+        public GoogleCloudLoggingSinkOptions(string projectId, string resourceType = null, string logName = null, Dictionary<string, string> labels = null, Dictionary<string, string> resourceLabels = null, string googleCredentialJson = null)
         {
             ProjectId = projectId;
+            GoogleCredentialJson = googleCredentialJson;
 
             if (resourceType != null)
                 ResourceType = resourceType;
