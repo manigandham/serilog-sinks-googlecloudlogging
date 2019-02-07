@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.
+- Improved handling of scalar values in JSON output by pattern matching on type instead of attempting to parse to double.
+- WARNING: JSON output only accepts numeric values as `double` so all numbers will be converted. Large integers and floating-point values will lose precision. If you want the exact value preserved then send then log it as a string instead.
+
 ## 1.5.0
 - Added support for .NET Core Configuration API, using [`serilog-settings-configuration`](https://github.com/serilog/serilog-settings-configuration)
 - Labels can be provided in options object constructor or set using properties. Both will be merged together.
