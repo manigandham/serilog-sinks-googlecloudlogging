@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Serilog.Configuration;
 using Serilog.Formatting.Display;
 
@@ -23,6 +24,15 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public static LoggerConfiguration GoogleCloudLogging(this LoggerSinkConfiguration loggerConfiguration, string projectID, bool useJsonOutput = false, int? batchSizeLimit = null, TimeSpan? period = null, string outputTemplate = null)
         {
             return loggerConfiguration.GoogleCloudLogging(new GoogleCloudLoggingSinkOptions(projectID) { UseJsonOutput = useJsonOutput }, batchSizeLimit, period, outputTemplate);
+        }
+        
+        public static LoggerConfiguration GoogleCloudLogging(this LoggerSinkConfiguration loggerConfiguration, string projectID, string resourceType = null, Dictionary<string, string> resourceLabels = null, bool useJsonOutput = false, int? batchSizeLimit = null, TimeSpan? period = null, string outputTemplate = null)
+        {
+            return loggerConfiguration.GoogleCloudLogging(
+                new GoogleCloudLoggingSinkOptions(projectID, resourceType, null, null, resourceLabels)
+                {
+                    UseJsonOutput = useJsonOutput
+                }, batchSizeLimit, period, outputTemplate);
         }
     }
 }
