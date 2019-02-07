@@ -7,7 +7,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public string ProjectId { get; }
         public string ResourceType { get; } = "global";
         public string LogName { get; } = "Default";
-        public string GoogleCredentialJson { get; } 
+        public string GoogleCredentialJson { get; }
 
         /// <summary>
         /// Additional custom labels added to all log entries.

@@ -24,13 +24,14 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly MonitoredResource _resource;
         private readonly MessageTemplateTextFormatter _messageTemplateTextFormatter;
 
-        public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter messageTemplateTextFormatter, int batchSizeLimit, TimeSpan period) : base(batchSizeLimit, period)
+        public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter messageTemplateTextFormatter, int batchSizeLimit, TimeSpan period) 
+            : base(batchSizeLimit, period)
         {
-            if (sinkOptions.GoogleCredentialJson == null)            
-                _client = LoggingServiceV2Client.Create();            
+            if (sinkOptions.GoogleCredentialJson == null)
+                _client = LoggingServiceV2Client.Create();
             else
-            {                
-                var googleCredential = GoogleCredential.FromJson(sinkOptions.GoogleCredentialJson);                               
+            {
+                var googleCredential = GoogleCredential.FromJson(sinkOptions.GoogleCredentialJson);
                 var channel = new Grpc.Core.Channel(LoggingServiceV2Client.DefaultEndpoint.Host, googleCredential.ToChannelCredentials());
                 _client = LoggingServiceV2Client.Create(channel);
             }
@@ -98,10 +99,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
                     return stringWriter.ToString();
                 }
             }
-            else
-            {
-                return e.RenderMessage();
-            }
+
+            return e.RenderMessage();
         }
 
         /// <summary>
@@ -112,66 +111,60 @@ namespace Serilog.Sinks.GoogleCloudLogging
             switch (propertyValue)
             {
                 case ScalarValue scalarValue when scalarValue.Value is null:
-                {
                     jsonStruct.Fields.Add(propertyKey, Value.ForNull());
-
                     break;
-                }
-                case ScalarValue scalarValue when scalarValue.Value is bool:
-                {
-                    jsonStruct.Fields.Add(propertyKey, Value.ForBool(Convert.ToBoolean(scalarValue.Value)));
 
+                case ScalarValue scalarValue when scalarValue.Value is bool boolValue:
+                    jsonStruct.Fields.Add(propertyKey, Value.ForBool(boolValue));
                     break;
-                }
-                case ScalarValue scalarValue when Double.TryParse(scalarValue.Value?.ToString(), out var doubleValue):
-                {
-                    jsonStruct.Fields.Add(propertyKey, Value.ForNumber(doubleValue));
 
+                case ScalarValue scalarValue
+                    when scalarValue.Value is short || scalarValue.Value is ushort || scalarValue.Value is int
+                         || scalarValue.Value is uint || scalarValue.Value is long || scalarValue.Value is ulong
+                         || scalarValue.Value is float || scalarValue.Value is double || scalarValue.Value is decimal:
+
+                    // all numbers are converted to double and may lose precision
+                    // numbers should be sent as strings if they do not fit in a double
+                    jsonStruct.Fields.Add(propertyKey, Value.ForNumber(Convert.ToDouble(scalarValue.Value)));
                     break;
-                }
-                case ScalarValue scalarValue:
-                {
-                    var stringValue = scalarValue.Value.ToString();
+
+                case ScalarValue scalarValue when scalarValue.Value is string stringValue:
                     jsonStruct.Fields.Add(propertyKey, Value.ForString(stringValue));
-
-                    if (_sinkOptions.UseSourceContextAsLogName && propertyKey.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
-                        log.LogName = new LogName(_sinkOptions.ProjectId, stringValue).ToString();
-
+                    CheckIfSourceContext(log, propertyKey, stringValue);
                     break;
-                }
+
+                case ScalarValue scalarValue:
+                    // handle all other scalar values as strings
+                    var strValue = scalarValue.Value.ToString();
+                    jsonStruct.Fields.Add(propertyKey, Value.ForString(strValue));
+                    CheckIfSourceContext(log, propertyKey, strValue);
+                    break;
+
                 case SequenceValue sequenceValue:
-                {
-                    var childStruct = new Struct();
-                    for (int i = 0; i < sequenceValue.Elements.Count; i++)
-                        WritePropertyAsJson(log, childStruct, i.ToString(), sequenceValue.Elements[i]);
+                    var sequenceChild = new Struct();
+                    for (var i = 0; i < sequenceValue.Elements.Count; i++)
+                        WritePropertyAsJson(log, sequenceChild, i.ToString(), sequenceValue.Elements[i]);
 
-                    jsonStruct.Fields.Add(propertyKey, Value.ForList(childStruct.Fields.Values.ToArray()));
-
+                    jsonStruct.Fields.Add(propertyKey, Value.ForList(sequenceChild.Fields.Values.ToArray()));
                     break;
-                }
+
                 case StructureValue structureValue:
-                {
-                    var childStruct = new Struct();
+                    var structureChild = new Struct();
                     foreach (var childProperty in structureValue.Properties)
-                        WritePropertyAsJson(log, childStruct, childProperty.Name, childProperty.Value);
+                        WritePropertyAsJson(log, structureChild, childProperty.Name, childProperty.Value);
 
-                    jsonStruct.Fields.Add(propertyKey, Value.ForStruct(childStruct));
-
+                    jsonStruct.Fields.Add(propertyKey, Value.ForStruct(structureChild));
                     break;
-                }
+
                 case DictionaryValue dictionaryValue:
-                {
-                    var childStruct = new Struct();
+                    var dictionaryChild = new Struct();
                     foreach (var childProperty in dictionaryValue.Elements)
-                        WritePropertyAsJson(log, childStruct, childProperty.Key.Value?.ToString(), childProperty.Value);
+                        WritePropertyAsJson(log, dictionaryChild, childProperty.Key.Value?.ToString(), childProperty.Value);
 
-                    jsonStruct.Fields.Add(propertyKey, Value.ForStruct(childStruct));
-
+                    jsonStruct.Fields.Add(propertyKey, Value.ForStruct(dictionaryChild));
                     break;
-                }
             }
         }
-
 
         /// <summary>
         /// Writes event properties as labels for a GCP log entry.
@@ -182,45 +175,40 @@ namespace Serilog.Sinks.GoogleCloudLogging
             switch (propertyValue)
             {
                 case ScalarValue scalarValue when scalarValue.Value is null:
-                {
                     log.Labels.Add(propertyKey, String.Empty);
-
                     break;
-                }
+
                 case ScalarValue scalarValue:
-                {
                     var stringValue = scalarValue.Value.ToString();
                     log.Labels.Add(propertyKey, stringValue);
-
-                    if (_sinkOptions.UseSourceContextAsLogName && propertyKey.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
-                        log.LogName = new LogName(_sinkOptions.ProjectId, stringValue).ToString();
-
+                    CheckIfSourceContext(log, propertyKey, stringValue);
                     break;
-                }
+
                 case SequenceValue sequenceValue:
-                {
                     log.Labels.Add(propertyKey, String.Join(",", sequenceValue.Elements));
-
                     break;
-                }
+
                 case StructureValue structureValue when structureValue.Properties.Count > 0:
-                {
                     foreach (var childProperty in structureValue.Properties)
                         WritePropertyAsLabel(log, propertyKey + "." + childProperty.Name, childProperty.Value);
 
                     break;
-                }
+
                 case DictionaryValue dictionaryValue when dictionaryValue.Elements.Count > 0:
-                {
                     foreach (var childProperty in dictionaryValue.Elements)
                         WritePropertyAsLabel(log, propertyKey + "." + childProperty.Key.ToString().Replace("\"", ""), childProperty.Value);
 
                     break;
-                }
             }
         }
 
-        private LogSeverity TranslateSeverity(LogEventLevel level)
+        private void CheckIfSourceContext(LogEntry log, string propertyKey, string stringValue)
+        {
+            if (_sinkOptions.UseSourceContextAsLogName && propertyKey.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
+                log.LogName = new LogName(_sinkOptions.ProjectId, stringValue).ToString();
+        }
+
+        private static LogSeverity TranslateSeverity(LogEventLevel level)
         {
             switch (level)
             {
