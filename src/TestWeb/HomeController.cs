@@ -35,10 +35,15 @@ namespace TestWeb
             _logger.LogInformation("Test message with List<string> {list}", new List<string> { "foo", "bar", "pizza" });
             _logger.LogInformation("Test message with List<int> {list}", new List<int> { 123, 456, 7890 });
             _logger.LogInformation("Test message with Dictionary<string,object> {dict}", new Dictionary<string, object> {
-                { "firstKeyWithString", "qwerty" },
-                { "secondKeyWithNumber", 12345 },
-                { "thirdKeyWithBool", true },
-                { "fourthKeyWithNull", null }
+                { "valueAsNull", null },
+                { "valueAsBool", true },
+                { "valueAsString", "qwerty" },
+                { "valueAsStringNumber", "00000" },
+                { "valueAsMaxInt", int.MaxValue },
+                { "valueAsMaxLong", long.MaxValue },
+                { "valueAsDouble", 123.456 },
+                { "valueAsMaxDouble", double.MaxValue },
+                { "valueAsMaxDecimal", decimal.MaxValue },
             });
 
             // create link to GCP log viewer
