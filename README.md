@@ -4,7 +4,7 @@ Serilog sink that writes events to [Google Cloud Platform Stackdriver Logging](h
 
 ## Getting started
 
-#### Install [package](https://www.nuget.org/packages/Serilog.Sinks.GoogleCloudLogging/) from Nuget:
+#### Install [package from Nuget](https://www.nuget.org/packages/Serilog.Sinks.GoogleCloudLogging/):
 
 ```
 dotnet add package Serilog.Sinks.GoogleCloudLogging
@@ -19,7 +19,7 @@ var log = new LoggerConfiguration().WriteTo.GoogleCloudLogging(config).CreateLog
 
 #### Configure Logger (using config file):
 
-This assumes that you are using ['serilog-settings-configuration'](https://github.com/serilog/serilog-settings-configuration) to allow you to load your sinks in via an `appsettings.json` file. This *only* supports `projectId`, `useJsonOutput` and `resourceType` / `resourceLabels` settings.
+This assumes that you are using ['serilog-settings-configuration'](https://github.com/serilog/serilog-settings-configuration) to load sinks using an `appsettings.json` file.
 
 ```json
 "Serilog": {
@@ -47,7 +47,7 @@ See [Monitored Resources and Services](https://cloud.google.com/logging/docs/api
 
 #### GCP authentication:
 
-This library uses the [`Google-Cloud-Dotnet`](https://googlecloudplatform.github.io/google-cloud-dotnet/) libraries which authenticate using the default service account on the machine. This is automatic on GCE VMs or you can use the [`gcloud`](https://cloud.google.com/sdk/) SDK to authenticate manually. The service account must have the [`Logs Writer`](https://cloud.google.com/logging/docs/access-control) permission to send logs.
+This library uses the [`Google-Cloud-Dotnet`](https://googlecloudplatform.github.io/google-cloud-dotnet/) libraries which authenticate using the [Application Default Credentials](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application) found on the host. This is automatic on GCE VMs or you can use the [`gcloud`](https://cloud.google.com/sdk/) SDK to authenticate manually. The service account must have the [`Logs Writer`](https://cloud.google.com/logging/docs/access-control) permission to send logs.
 
 ## Sink Options
 
@@ -60,6 +60,7 @@ Name | Required | Default | Description
 `ResourceLabels` | | | `Dictionary<string, string>` of properties added to all log entries, at the resource level.
 `UseSourceContextAsLogName` | | True | The log name for a log entry will be set to the [SourceContext](https://github.com/serilog/serilog/wiki/Writing-Log-Events#source-contexts) property if it's available.
 `UseJsonOutput` | | False | Structured logs can be sent as text with labels or as a JSON object, see details below.
+`GoogleCredentialJson` | | | GCP client libraries use [Application Default Credentials](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application). If these are not available or you need to use other credentials, you can specific the JSON text of a credential file yourself.
 
 #### Output Type
 
