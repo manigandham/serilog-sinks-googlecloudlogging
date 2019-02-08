@@ -1,6 +1,10 @@
 # Changelog
 
-## 1.6.
+## 1.7.0
+- All options can now be configured through `appsettings.json`.
+- New option to provide Google Application Credentials as JSON text.
+
+## 1.6.0
 - Improved handling of scalar values in JSON output by pattern matching on type instead of attempting to parse to double.
 - WARNING: JSON output only accepts numeric values as `double` so all numbers will be converted. Large integers and floating-point values will lose precision. If you want the exact value preserved then send then log it as a string instead.
 
