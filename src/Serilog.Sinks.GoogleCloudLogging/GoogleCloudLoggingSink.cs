@@ -24,11 +24,13 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly MonitoredResource _resource;
         private readonly MessageTemplateTextFormatter _messageTemplateTextFormatter;
 
-        public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter messageTemplateTextFormatter, int batchSizeLimit, TimeSpan period) 
+        public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter messageTemplateTextFormatter, int batchSizeLimit, TimeSpan period)
             : base(batchSizeLimit, period)
         {
             if (sinkOptions.GoogleCredentialJson == null)
+            {
                 _client = LoggingServiceV2Client.Create();
+            }
             else
             {
                 var googleCredential = GoogleCredential.FromJson(sinkOptions.GoogleCredentialJson);
