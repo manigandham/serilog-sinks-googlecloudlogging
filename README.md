@@ -19,7 +19,7 @@ var log = new LoggerConfiguration().WriteTo.GoogleCloudLogging(config).CreateLog
 
 #### Configure Logger (using config file):
 
-This assumes that you are using ['serilog-settings-configuration'](https://github.com/serilog/serilog-settings-configuration) to allow you to load your sinks in via an `appsettings.json` file. This *only* supports `projectId` and `useJsonOutput` settings.
+This assumes that you are using ['serilog-settings-configuration'](https://github.com/serilog/serilog-settings-configuration) to allow you to load your sinks in via an `appsettings.json` file. This *only* supports `projectId`, `useJsonOutput` and `resourceType` / `resourceLabels` settings.
 
 ```json
 "Serilog": {
@@ -30,12 +30,20 @@ This assumes that you are using ['serilog-settings-configuration'](https://githu
         "Args":
         {
           "projectID": "YOUR_PROJECT_ID",
-          "useJsonOutput": "true"
+          "useJsonOutput": "true",
+          "resourceType": "k8s_cluster",
+          "resourceLabels": {
+            "project_id": "PROJECT-ID-HERE-12345",
+            "location": "LOCATION-STRING-HERE-region-name",
+            "cluster_name": "CLUSTER-NAME-HERE-container-cluster"
+          }
         }
       }
     ]
   }
 ```
+
+See [Monitored Resources and Services](https://cloud.google.com/logging/docs/api/v2/resource-list) for the correct `resourceLabels`.
 
 #### GCP authentication:
 
