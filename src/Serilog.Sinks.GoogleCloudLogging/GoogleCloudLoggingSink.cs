@@ -4,9 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Google.Api;
+using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Logging.Type;
 using Google.Cloud.Logging.V2;
 using Google.Protobuf.WellKnownTypes;
+using Grpc.Auth;
 using Serilog.Events;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.PeriodicBatching;
@@ -25,7 +27,17 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter messageTemplateTextFormatter, int batchSizeLimit, TimeSpan period)
             : base(batchSizeLimit, period)
         {
-            _client = LoggingServiceV2Client.Create();
+            if (sinkOptions.GoogleCredentialJson == null)
+            {
+                _client = LoggingServiceV2Client.Create();
+            }
+            else
+            {
+                var googleCredential = GoogleCredential.FromJson(sinkOptions.GoogleCredentialJson);
+                var channel = new Grpc.Core.Channel(LoggingServiceV2Client.DefaultEndpoint.Host, googleCredential.ToChannelCredentials());
+                _client = LoggingServiceV2Client.Create(channel);
+            }
+
             _sinkOptions = sinkOptions;
 
             _resource = new MonitoredResource { Type = sinkOptions.ResourceType };
