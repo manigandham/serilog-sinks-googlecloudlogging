@@ -23,7 +23,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly LogNameOneof _logNameToWrite;
         private readonly MonitoredResource _resource;
         private readonly MessageTemplateTextFormatter _messageTemplateTextFormatter;
-
+        
         public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter messageTemplateTextFormatter, int batchSizeLimit, TimeSpan period)
             : base(batchSizeLimit, period)
         {
@@ -61,13 +61,27 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 {
                     LogName = _logName,
                     Severity = TranslateSeverity(e.Level),
-                    Timestamp = Timestamp.FromDateTimeOffset(e.Timestamp)
+                    Timestamp = Timestamp.FromDateTimeOffset(e.Timestamp)              
                 };
 
                 if (_sinkOptions.UseJsonOutput)
                 {
                     var jsonStruct = new Struct();
-                    jsonStruct.Fields.Add("message", Value.ForString(RenderEventMessage(e)));
+                    
+                    if (entry.Severity == LogSeverity.Error && !string.IsNullOrEmpty(_sinkOptions.ErrorReportingServiceName))
+                    {
+                        jsonStruct.Fields.Add("message", Value.ForString(RenderEventMessage(e) + "\n" + RenderException(e.Exception)));
+
+                        var serviceContextStruct = new Struct();
+                        jsonStruct.Fields.Add("serviceContext", Value.ForStruct(serviceContextStruct));
+
+                        serviceContextStruct.Fields.Add("service", Value.ForString(_sinkOptions.ErrorReportingServiceName));
+                        serviceContextStruct.Fields.Add("version", Value.ForString(_sinkOptions.ErrorReportingServiceVersion));
+                    }
+                    else
+                    {
+                        jsonStruct.Fields.Add("message", Value.ForString(RenderEventMessage(e)));
+                    }
 
                     var propertiesStruct = new Struct();
                     jsonStruct.Fields.Add("properties", Value.ForStruct(propertiesStruct));
@@ -89,6 +103,23 @@ namespace Serilog.Sinks.GoogleCloudLogging
             }
 
             await _client.WriteLogEntriesAsync(_logNameToWrite, _resource, _sinkOptions.Labels, logEntries);
+        }
+
+        private static string RenderException(Exception ex)
+        {            
+            if (ex.GetType() == typeof(AggregateException))
+            {
+                // ErrorReporting won't report all InnerExceptions for an AggregateException. This work-around isn't perfect but better than the default behavior
+                var MessageStrings = new List<string>();
+                MessageStrings.AddRange(((AggregateException)ex).Flatten().InnerExceptions.Select(s => s.Message));
+                MessageStrings.Add(ex.StackTrace);
+
+                return String.Join("\n", MessageStrings);
+            }
+            else
+            {
+                return ex.ToString();
+            }
         }
 
         private string RenderEventMessage(LogEvent e)

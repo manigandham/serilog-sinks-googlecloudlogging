@@ -38,6 +38,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <summary>
         /// Logs are normally sent as a formatted line of text with attached properties serialized as a flat list of string labels.
         /// This option allows for serializing the log and properties as a JSON object instead, to maintain data types and structure as much as possible for richer querying within GCP Log Viewer.
+        /// This must be set to True for errors to be forwarded to ErrorReporting.
         /// Defaults to false.
         /// </summary>
         public bool UseJsonOutput { get; set; }
@@ -46,6 +47,18 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// JSON string of Google Cloud credentials file, otherwise will use Application Default credentials found on host by default.
         /// </summary>
         public string GoogleCredentialJson { get; set; }
+
+        /// <summary>
+        /// If log entry is severity Error this will be the "service" in the "serviceContext" JSON node. This is required for errors to be forwarded to StackDriver ErrorReporting and "UseJsonOutput" must be True.
+        /// System.Reflection.Assembly.GetExecutingAssembly().GetName().Name is a good value to use
+        /// </summary>
+        public string ErrorReportingServiceName { get; set; }
+
+        /// <summary>
+        /// If log entry is severity Error this will be the "version" in the "serviceContext" JSON node. This is required for errors to be forwarded to StackDriver ErrorReporting and "UseJsonOutput" must be True.
+        /// System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() is a good value to use
+        /// </summary>
+        public string ErrorReportingServiceVersion { get; set; }
 
         /// <summary>
         /// Options for Google Cloud Logging
@@ -58,6 +71,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <param name="useSourceContextAsLogName"></param>
         /// <param name="useJsonOutput"></param>
         /// <param name="googleCredentialJson">JSON string of Google Cloud credentials file, otherwise will use Application Default credentials found on host by default.</param>
+        /// <param name="errorReportingServiceName">Valid only for error severity log entries, this is "serviceContext.service" in the jsonPayload.</param>
+        /// <param name="errorReportingServiceVersion">Valid only for error severity log entries, this is "serviceContext.version" in the jsonPayload.</param>
         public GoogleCloudLoggingSinkOptions(
             string projectId,
             string resourceType = null,
@@ -66,7 +81,9 @@ namespace Serilog.Sinks.GoogleCloudLogging
             Dictionary<string, string> resourceLabels = null,
             bool useSourceContextAsLogName = true,
             bool useJsonOutput = false,
-            string googleCredentialJson = null
+            string googleCredentialJson = null,
+            string errorReportingServiceName = null,
+            string errorReportingServiceVersion = null
         )
         {
             ProjectId = projectId;
@@ -84,6 +101,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
             UseSourceContextAsLogName = useSourceContextAsLogName;
             UseJsonOutput = useJsonOutput;
             GoogleCredentialJson = googleCredentialJson;
+            ErrorReportingServiceName = errorReportingServiceName;
+            ErrorReportingServiceVersion = errorReportingServiceVersion ?? "<Unknown>";
         }
     }
 }
