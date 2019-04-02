@@ -47,7 +47,7 @@ namespace TestWeb
             });
 
             // create link to GCP log viewer
-            var url = $"https://console.cloud.google.com/logs/viewer?project={Program.GCP_PROJECT_ID}";
+            var url = $"https://console.cloud.google.com/logs/viewer";
             var page = $"<html><body>Logged messages, visit GCP log viewer at <a href='{url}'>{url}</a></body></html>";
             return Content(page, "text/html");
         }
