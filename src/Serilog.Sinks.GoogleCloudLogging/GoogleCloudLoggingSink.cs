@@ -23,7 +23,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly LogNameOneof _logNameToWrite;
         private readonly MonitoredResource _resource;
         private readonly MessageTemplateTextFormatter _messageTemplateTextFormatter;
-        
+        private readonly bool _errorReportingEnabled;
+
         public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter messageTemplateTextFormatter, int batchSizeLimit, TimeSpan period)
             : base(batchSizeLimit, period)
         {
@@ -49,6 +50,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
             _logNameToWrite = LogNameOneof.From(ln);
 
             _messageTemplateTextFormatter = messageTemplateTextFormatter;
+
+            _errorReportingEnabled = !string.IsNullOrWhiteSpace(_sinkOptions.ErrorReportingServiceName);
         }
 
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
@@ -61,14 +64,14 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 {
                     LogName = _logName,
                     Severity = TranslateSeverity(e.Level),
-                    Timestamp = Timestamp.FromDateTimeOffset(e.Timestamp)              
+                    Timestamp = Timestamp.FromDateTimeOffset(e.Timestamp)
                 };
 
                 if (_sinkOptions.UseJsonOutput)
                 {
                     var jsonStruct = new Struct();
-                    
-                    if (entry.Severity == LogSeverity.Error && !string.IsNullOrEmpty(_sinkOptions.ErrorReportingServiceName))
+
+                    if (_errorReportingEnabled && entry.Severity == LogSeverity.Error)
                     {
                         jsonStruct.Fields.Add("message", Value.ForString(RenderEventMessage(e) + "\n" + RenderException(e.Exception)));
 
@@ -106,7 +109,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         }
 
         private static string RenderException(Exception ex)
-        {            
+        {
             if (ex.GetType() == typeof(AggregateException))
             {
                 // ErrorReporting won't report all InnerExceptions for an AggregateException. This work-around isn't perfect but better than the default behavior

@@ -36,6 +36,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
             bool useSourceContextAsLogName = true,
             bool useJsonOutput = false,
             string googleCredentialJson = null,
+            string errorReportingServiceName = null,
+            string errorReportingServiceVersion = null,
             int? batchSizeLimit = null,
             TimeSpan? period = null,
             string outputTemplate = null
@@ -49,7 +51,9 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 resourceLabels,
                 useSourceContextAsLogName,
                 useJsonOutput,
-                googleCredentialJson
+                googleCredentialJson,
+                errorReportingServiceName,
+                errorReportingServiceVersion
             );
 
             return loggerConfiguration.GoogleCloudLogging(options, batchSizeLimit, period, outputTemplate);
