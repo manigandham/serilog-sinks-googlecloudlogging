@@ -61,6 +61,9 @@ Name | Required | Default | Description
 `UseSourceContextAsLogName` | | True | The log name for a log entry will be set to the [SourceContext](https://github.com/serilog/serilog/wiki/Writing-Log-Events#source-contexts) property if it's available.
 `UseJsonOutput` | | False | Structured logs can be sent as text with labels or as a JSON object, see details below.
 `GoogleCredentialJson` | | | GCP client libraries use [Application Default Credentials](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application). If these are not available or you need to use other credentials, you can specific the JSON text of a credential file yourself.
+`ErrorReportingServiceName` | | | Log entries using "Error" severity with an attached Exception can be sent to StackDriver Error Reporting. Set a name for the service to enable. Must also have `UseJsonOutput` set to true.
+`ErrorReportingServiceVersion` | | | Optionally add a version for automatic error reporting as set above, otherwise will be logged as `<unknown>`
+
 
 #### Output Type
 

@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.10.0
+- Fixed bug if there is no exception attached for "Error" entry.
+
 ## 1.9.0
 - Added ability for log entries logged as "Error" to be sent to StackDriver error reporting.
 
