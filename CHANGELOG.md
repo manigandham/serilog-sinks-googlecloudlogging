@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.9.0
+- Added ability for log entries logged as "Error" to be sent to StackDriver error reporting.
+
 ## 1.7.0
 - All options can now be configured through `appsettings.json`.
 - New option to provide Google Application Credentials as JSON text.
