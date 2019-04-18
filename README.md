@@ -51,18 +51,22 @@ This library uses the [`Google-Cloud-Dotnet`](https://googlecloudplatform.github
 
 ## Sink Options
 
-Name | Required | Default | Description
----- | -------- | ------- | -----------
-`ProjectId` | Yes | | Google Cloud project ID where logs will be sent. 
-`ResourceType` | Yes | `global` | Resource type for all log output. Must be one of the supported types listed in the  [cloud logging documentation](https://cloud.google.com/logging/docs/api/v2/resource-list).
-`LogName` | Yes | `Default` | Name of the log.
-`Labels` | | | `Dictionary<string, string>` of properties added to all log entries.
-`ResourceLabels` | | | `Dictionary<string, string>` of properties added to all log entries, at the resource level.
-`UseSourceContextAsLogName` | | True | The log name for a log entry will be set to the [SourceContext](https://github.com/serilog/serilog/wiki/Writing-Log-Events#source-contexts) property if it's available.
-`UseJsonOutput` | | False | Structured logs can be sent as text with labels or as a JSON object, see details below.
-`GoogleCredentialJson` | | | GCP client libraries use [Application Default Credentials](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application). If these are not available or you need to use other credentials, you can specific the JSON text of a credential file yourself.
-`ErrorReportingServiceName` | | | Log entries using "Error" severity with an attached Exception can be sent to StackDriver Error Reporting. Set a name for the service to enable. Must also have `UseJsonOutput` set to true.
-`ErrorReportingServiceVersion` | | | Optionally add a version for automatic error reporting as set above, otherwise will be logged as `<unknown>`
+- `ProjectId`
+  Required: Yes 
+  Google Cloud project ID where logs will be sent. 
+
+Name | Default | Description
+---- | ------- | -----------
+`ProjectId` (required)| | Google Cloud project ID where logs will be sent. 
+`ResourceType` (required) | `global` | Resource type for all log output. Must be one of the supported types listed in the  [cloud logging documentation](https://cloud.google.com/logging/docs/api/v2/resource-list).
+`LogName` (required) | `Default` | Name of the log.
+`Labels` | | `Dictionary<string, string>` of properties added to all log entries.
+`ResourceLabels` | | `Dictionary<string, string>` of properties added to all log entries, at the resource level.
+`UseSourceContextAsLogName` | True | The log name for a log entry will be set to the [SourceContext](https://github.com/serilog/serilog/wiki/Writing-Log-Events#source-contexts) property if it's available.
+`UseJsonOutput` | False | Structured logs can be sent as text with labels or as a JSON object, see details below.
+`GoogleCredentialJson` | | GCP client libraries use [Application Default Credentials](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application). If these are not available or you need to use other credentials, set the JSON text of a credential file directly.
+`ErrorReportingServiceName` | | Log entries using "Error" severity with an attached Exception can be sent to StackDriver Error Reporting. Set a name for the service to enable. Must also have `UseJsonOutput` set to true.
+`ErrorReportingServiceVersion` | | Optionally add a version for automatic error reporting as set above, otherwise will be logged as `<unknown>`
 
 
 #### Output Type
