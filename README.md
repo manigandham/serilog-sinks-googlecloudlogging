@@ -23,31 +23,31 @@ This assumes that you are using ['serilog-settings-configuration'](https://githu
 
 ```json
 "Serilog": {
-    "Using": [ "Serilog.Sinks.GoogleCloudLogging" ],
-    "MinimumLevel": "Warning",
-    "WriteTo": [
-      { "Name":"GoogleCloudLogging", 
-        "Args":
-        {
-          "projectID": "YOUR_PROJECT_ID",
-          "useJsonOutput": "true",
-          "resourceType": "k8s_cluster",
-          "resourceLabels": {
-            "project_id": "PROJECT-ID-HERE-12345",
-            "location": "LOCATION-STRING-HERE-region-name",
-            "cluster_name": "CLUSTER-NAME-HERE-container-cluster"
-          }
+  "Using": [ "Serilog.Sinks.GoogleCloudLogging" ],
+  "MinimumLevel": "Warning",
+  "WriteTo": [
+    {
+      "Name": "GoogleCloudLogging",
+      "Args": {
+        "projectID": "YOUR_PROJECT_ID",
+        "useJsonOutput": "true",
+        "resourceType": "k8s_cluster",
+        "resourceLabels": {
+          "project_id": "PROJECT-ID-HERE-12345",
+          "location": "LOCATION-STRING-HERE-region-name",
+          "cluster_name": "CLUSTER-NAME-HERE-container-cluster"
         }
       }
-    ]
-  }
+    }
+  ]
+}
 ```
 
 See [Monitored Resources and Services](https://cloud.google.com/logging/docs/api/v2/resource-list) for the correct `resourceLabels`.
 
 #### GCP authentication:
 
-This library uses the [`Google-Cloud-Dotnet`](https://googlecloudplatform.github.io/google-cloud-dotnet/) libraries which authenticate using the [Application Default Credentials](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application) found on the host. This is automatic on GCE VMs or you can use the [`gcloud`](https://cloud.google.com/sdk/) SDK to authenticate manually. The service account must have the [`Logs Writer`](https://cloud.google.com/logging/docs/access-control) permission to send logs.
+This library uses the [`Google-Cloud-Dotnet`](https://googleapis.github.io/google-cloud-dotnet/) libraries which authenticate using the [Application Default Credentials](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application) found on the host. This is automatic on GCE VMs or you can use the [`gcloud`](https://cloud.google.com/sdk/) SDK to authenticate manually. The service account must have the [`Logs Writer`](https://cloud.google.com/logging/docs/access-control) permission to send logs.
 
 ## Sink Options
 
