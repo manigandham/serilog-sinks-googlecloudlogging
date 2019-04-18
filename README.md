@@ -1,6 +1,6 @@
 # Serilog.Sinks.GoogleCloudLogging
 
-Serilog sink that writes events to [Google Cloud Platform Stackdriver Logging](https://cloud.google.com/logging/).
+Serilog sink that writes events to [Google Cloud Platform Stackdriver Logging](https://cloud.google.com/logging/). View release notes here: [CHANGELOG.md](CHANGELOG.md)
 
 ## Getting started
 
