@@ -51,10 +51,6 @@ This library uses the [`Google-Cloud-Dotnet`](https://googlecloudplatform.github
 
 ## Sink Options
 
-- `ProjectId`
-  Required: Yes 
-  Google Cloud project ID where logs will be sent. 
-
 Name | Default | Description
 ---- | ------- | -----------
 `ProjectId` (required)| | Google Cloud project ID where logs will be sent. 
