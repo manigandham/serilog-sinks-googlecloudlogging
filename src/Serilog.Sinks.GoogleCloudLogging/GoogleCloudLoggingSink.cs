@@ -71,7 +71,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 {
                     var jsonStruct = new Struct();
 
-                    if (_errorReportingEnabled && entry.Severity == LogSeverity.Error && e.Exception != null)
+                    if (e.Exception != null && _errorReportingEnabled && (entry.Severity == LogSeverity.Error || entry.Severity == LogSeverity.Critical))
                     {
                         jsonStruct.Fields.Add("message", Value.ForString(RenderEventMessage(e) + "\n" + RenderException(e.Exception)));
 
