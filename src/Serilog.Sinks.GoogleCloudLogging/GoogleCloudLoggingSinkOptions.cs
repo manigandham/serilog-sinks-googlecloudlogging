@@ -7,7 +7,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <summary>
         /// ID (not name) of Google Cloud project where logs will be sent. 
         /// </summary>
-        public string ProjectId { get; }
+        public string ProjectId { get; set; }
 
         /// <summary>
         /// Resource type for logs. Default is "global" which shows as "Global" in Google Cloud Console UI.
@@ -74,7 +74,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <param name="errorReportingServiceName">Valid only for error severity log entries, this is "serviceContext.service" in the jsonPayload.</param>
         /// <param name="errorReportingServiceVersion">Valid only for error severity log entries, this is "serviceContext.version" in the jsonPayload.</param>
         public GoogleCloudLoggingSinkOptions(
-            string projectId,
+            string projectId = null,
             string resourceType = null,
             string logName = null,
             Dictionary<string, string> labels = null,

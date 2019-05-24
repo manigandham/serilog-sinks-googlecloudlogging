@@ -26,6 +26,10 @@ namespace Serilog.Sinks.GoogleCloudLogging
             return loggerConfiguration.Sink(sink);
         }
 
+        /// <summary>
+        /// Overload that accepts all configuration settings as parameters to allow configuration in files using serilog-settings-configuration package.
+        /// This method creates a GoogleCloudLoggingSinkOptions and calls the standard constructor above.
+        /// </summary>
         public static LoggerConfiguration GoogleCloudLogging(
             this LoggerSinkConfiguration loggerConfiguration,
             string projectId,
