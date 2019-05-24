@@ -52,7 +52,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             _logName = ln.ToString();
             _logNameToWrite = LogNameOneof.From(ln);
 
-            _serviceNameAvailable = !String.IsNullOrWhiteSpace(_sinkOptions.ErrorReportingServiceName);
+            _serviceNameAvailable = !String.IsNullOrWhiteSpace(_sinkOptions.ServiceName);
         }
 
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
@@ -94,8 +94,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
                     // this is required for any logged exceptions to automatically be picked up stackdriver error reporting
                     var contextStruct = new Struct();
                     jsonStruct.Fields.Add("serviceContext", Value.ForStruct(contextStruct));
-                    contextStruct.Fields.Add("service", Value.ForString(_sinkOptions.ErrorReportingServiceName));
-                    contextStruct.Fields.Add("version", Value.ForString(_sinkOptions.ErrorReportingServiceVersion));
+                    contextStruct.Fields.Add("service", Value.ForString(_sinkOptions.ServiceName));
+                    contextStruct.Fields.Add("version", Value.ForString(_sinkOptions.ServiceVersion));
                 }
             }
             else

@@ -36,10 +36,9 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public bool UseSourceContextAsLogName { get; set; }
 
         /// <summary>
-        /// Logs are normally sent as a formatted line of text with attached properties serialized as a flat list of string labels.
-        /// This option allows for serializing the log and properties as a JSON object instead, to maintain data types and structure as much as possible for richer querying within GCP Log Viewer.
-        /// This must be set to True for errors to be forwarded to ErrorReporting.
-        /// Defaults to false.
+        /// Logs are normally sent as a formatted line of text with attached properties serialized as strings.
+        /// Enabling this option serializes the log and properties as a JSON object instead, which maintains data types and structure as much as possible for richer querying within GCP Log Viewer.
+        /// Defaults to false. This must be set to True for logged exceptions to be forwarded to StackDriver Error Reporting.
         /// </summary>
         public bool UseJsonOutput { get; set; }
 
@@ -49,16 +48,16 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public string GoogleCredentialJson { get; set; }
 
         /// <summary>
-        /// If log entry is severity Error this will be the "service" in the "serviceContext" JSON node. This is required for errors to be forwarded to StackDriver ErrorReporting and "UseJsonOutput" must be True.
-        /// System.Reflection.Assembly.GetExecutingAssembly().GetName().Name is a good value to use
+        /// Added as "serviceContext.service" metadata in "jsonPayload". This is required for logged exceptions to be forwarded to StackDriver Error Reporting and "UseJsonOutput" must be True.
+        /// System.Reflection.Assembly.GetExecutingAssembly().GetName().Name is a good value to use.
         /// </summary>
-        public string ErrorReportingServiceName { get; set; }
+        public string ServiceName { get; set; }
 
         /// <summary>
-        /// If log entry is severity Error this will be the "version" in the "serviceContext" JSON node. This is required for errors to be forwarded to StackDriver ErrorReporting and "UseJsonOutput" must be True.
-        /// System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() is a good value to use
+        /// Added as "serviceContext.version" metadata in "jsonPayload". This is required for logged exceptions to be forwarded to StackDriver Error Reporting and "UseJsonOutput" must be True.
+        /// System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() is a good value to use.
         /// </summary>
-        public string ErrorReportingServiceVersion { get; set; }
+        public string ServiceVersion { get; set; }
 
         /// <summary>
         /// Options for Google Cloud Logging
@@ -71,8 +70,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <param name="useSourceContextAsLogName"></param>
         /// <param name="useJsonOutput"></param>
         /// <param name="googleCredentialJson">JSON string of Google Cloud credentials file, otherwise will use Application Default credentials found on host by default.</param>
-        /// <param name="errorReportingServiceName">Valid only for error severity log entries, this is "serviceContext.service" in the jsonPayload.</param>
-        /// <param name="errorReportingServiceVersion">Valid only for error severity log entries, this is "serviceContext.version" in the jsonPayload.</param>
+        /// <param name="serviceName">Name of service, added as "serviceContext.service" metadata.</param>
+        /// <param name="serviceVersion">Version of service, added as "serviceContext.version" metadata.</param>
         public GoogleCloudLoggingSinkOptions(
             string projectId = null,
             string resourceType = null,
@@ -82,8 +81,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
             bool useSourceContextAsLogName = true,
             bool useJsonOutput = false,
             string googleCredentialJson = null,
-            string errorReportingServiceName = null,
-            string errorReportingServiceVersion = null
+            string serviceName = null,
+            string serviceVersion = null
         )
         {
             ProjectId = projectId;
@@ -101,8 +100,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
             UseSourceContextAsLogName = useSourceContextAsLogName;
             UseJsonOutput = useJsonOutput;
             GoogleCredentialJson = googleCredentialJson;
-            ErrorReportingServiceName = errorReportingServiceName;
-            ErrorReportingServiceVersion = errorReportingServiceVersion ?? "<Unknown>";
+            ServiceName = serviceName;
+            ServiceVersion = serviceVersion ?? "<Unknown>";
         }
     }
 }
