@@ -34,7 +34,8 @@ namespace TestWeb
             _logger.LogInformation(eventId: new Random().Next(), message: "Test message with random event ID");
             _logger.LogInformation("Test message with List<string> {list}", new List<string> { "foo", "bar", "pizza" });
             _logger.LogInformation("Test message with List<int> {list}", new List<int> { 123, 456, 7890 });
-            _logger.LogInformation("Test message with Dictionary<string,object> {dict}", new Dictionary<string, object> {
+            _logger.LogInformation("Test message with Dictionary<string,object> {dict}", new Dictionary<string, object>
+            {
                 { "valueAsNull", null },
                 { "valueAsBool", true },
                 { "valueAsString", "qwerty" },
@@ -45,6 +46,15 @@ namespace TestWeb
                 { "valueAsMaxDouble", double.MaxValue },
                 { "valueAsMaxDecimal", decimal.MaxValue },
             });
+
+            try
+            {
+                throw new Exception("Testing exception logging");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "");
+            }
 
             // create link to GCP log viewer
             var url = $"https://console.cloud.google.com/logs/viewer";
