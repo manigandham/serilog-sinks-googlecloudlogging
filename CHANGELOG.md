@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.0
+- Breaking: `ErrorReportingServiceName` and `ErrorReportingServiceVersion` config options changed to `ServiceName` and `ServiceVersion`.
+- Service name and version metadata will be added to all log entries, and will allow exceptions at any level to be picked up by StackDriver error reporting.
+- Improved log formatting and excepting handling, Better preformance and lower allocations.
+
 ## 1.10.0
 - Fixed bug if there is no exception attached for "Error" entry.
 
