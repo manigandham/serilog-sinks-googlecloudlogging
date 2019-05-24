@@ -5,7 +5,6 @@
     <Description>Serilog sink that writes events to Google Cloud Platform Stackdriver Logging.</Description>
     <Authors>Mani Gandham</Authors>
     <PackageLicense>MIT</PackageLicense>
-    <PackageLicenseUrl>https://github.com/manigandham/serilog-sinks-googlecloudlogging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/manigandham/serilog-sinks-googlecloudlogging</PackageProjectUrl>
     <PackageIconUrl>https://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
     <PackageTags>serilog; sink; google cloud; stackdriver; logging;</PackageTags>
@@ -15,7 +14,7 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.10.0</Version>
+    <Version>2.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
