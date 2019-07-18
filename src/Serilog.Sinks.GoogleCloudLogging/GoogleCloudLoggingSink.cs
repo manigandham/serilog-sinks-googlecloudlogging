@@ -77,25 +77,23 @@ namespace Serilog.Sinks.GoogleCloudLogging
             if (_sinkOptions.UseJsonOutput)
             {
                 // json output builds up a protobuf object that gets serialized in the stackdriver logs
-                var jsonStruct = new Struct();
-                entry.JsonPayload = jsonStruct;
-
-                jsonStruct.Fields.Add("message", Value.ForString(_logFormatter.RenderEventMessage(writer, e)));
+                entry.JsonPayload = new Struct();
+                entry.JsonPayload.Fields.Add("message", Value.ForString(_logFormatter.RenderEventMessage(writer, e)));
 
                 var propStruct = new Struct();
-                jsonStruct.Fields.Add("properties", Value.ForStruct(propStruct));
-
                 foreach (var property in e.Properties)
                     _logFormatter.WritePropertyAsJson(entry, propStruct, property.Key, property.Value);
 
+                entry.JsonPayload.Fields.Add("properties", Value.ForStruct(propStruct));
+
+                // service name and version are added as extra context data if available
+                // these properties are required for any logged exceptions to automatically be picked up by stackdriver error reporting
                 if (_serviceNameAvailable)
                 {
-                    // service name and version are added extra context information
-                    // this is required for any logged exceptions to automatically be picked up stackdriver error reporting
                     var contextStruct = new Struct();
-                    jsonStruct.Fields.Add("serviceContext", Value.ForStruct(contextStruct));
                     contextStruct.Fields.Add("service", Value.ForString(_sinkOptions.ServiceName));
                     contextStruct.Fields.Add("version", Value.ForString(_sinkOptions.ServiceVersion));
+                    entry.JsonPayload.Fields.Add("serviceContext", Value.ForStruct(contextStruct));
                 }
             }
             else
