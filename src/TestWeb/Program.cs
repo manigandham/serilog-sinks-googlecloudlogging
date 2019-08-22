@@ -41,8 +41,9 @@ namespace TestWeb
             {
                 ResourceType = "k8s_cluster",
                 LogName = "someLogName",
-                UseSourceContextAsLogName = false,
-                UseJsonOutput = true
+                UseSourceContextAsLogName = true,
+                UseJsonOutput = true,
+                WriteOriginalFormat = true
             };
 
             Log.Logger = new LoggerConfiguration()

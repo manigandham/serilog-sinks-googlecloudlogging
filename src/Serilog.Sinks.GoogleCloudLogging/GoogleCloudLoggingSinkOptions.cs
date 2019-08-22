@@ -60,6 +60,13 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public string ServiceVersion { get; set; }
 
         /// <summary>
+        /// Logs do not normally contain a property representing the raw message template string itself.
+        /// Enabling this option adds a property named "OriginalFormat" to the log entry, which can be used in various filtering criteria.
+        /// Defaults to false.
+        /// </summary>
+        public bool WriteOriginalFormat { get; set; }
+
+        /// <summary>
         /// Options for Google Cloud Logging
         /// </summary>
         /// <param name="projectId">ID (not name) of Google Cloud project where logs will be sent.</param>
@@ -72,6 +79,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <param name="googleCredentialJson">JSON string of Google Cloud credentials file, otherwise will use Application Default credentials found on host by default.</param>
         /// <param name="serviceName">Name of service, added as "serviceContext.service" metadata.</param>
         /// <param name="serviceVersion">Version of service, added as "serviceContext.version" metadata.</param>
+        /// <param name="writeOriginalFormat">Should an additional property be added that contains the original message format string.</param>
         public GoogleCloudLoggingSinkOptions(
             string projectId = null,
             string resourceType = null,
@@ -82,7 +90,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
             bool useJsonOutput = false,
             string googleCredentialJson = null,
             string serviceName = null,
-            string serviceVersion = null
+            string serviceVersion = null,
+            bool writeOriginalFormat = false
         )
         {
             ProjectId = projectId;
@@ -102,6 +111,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             GoogleCredentialJson = googleCredentialJson;
             ServiceName = serviceName;
             ServiceVersion = serviceVersion ?? "<Unknown>";
+            writeOriginalFormat = writeOriginalFormat;
         }
     }
 }

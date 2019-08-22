@@ -44,7 +44,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
             string serviceVersion = null,
             int? batchSizeLimit = null,
             TimeSpan? period = null,
-            string outputTemplate = null
+            string outputTemplate = null,
+            bool writeOriginalFormat = false
         )
         {
             var options = new GoogleCloudLoggingSinkOptions(
@@ -57,7 +58,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 useJsonOutput,
                 googleCredentialJson,
                 serviceName,
-                serviceVersion
+                serviceVersion,
+                writeOriginalFormat
             );
 
             return loggerConfiguration.GoogleCloudLogging(options, batchSizeLimit, period, outputTemplate);

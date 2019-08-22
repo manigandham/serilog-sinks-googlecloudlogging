@@ -24,6 +24,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly MonitoredResource _resource;
         private readonly bool _serviceNameAvailable;
         private readonly LogFormatter _logFormatter;
+        private readonly bool _writeOriginalFormat;
+        private const string OriginalFormat = "OriginalFormat";
 
         public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter messageTemplateTextFormatter, int batchSizeLimit, TimeSpan period)
             : base(batchSizeLimit, period)
@@ -53,6 +55,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             _logNameToWrite = LogNameOneof.From(ln);
 
             _serviceNameAvailable = !String.IsNullOrWhiteSpace(_sinkOptions.ServiceName);
+            _writeOriginalFormat = sinkOptions.WriteOriginalFormat;
         }
 
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
@@ -81,8 +84,17 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 entry.JsonPayload.Fields.Add("message", Value.ForString(_logFormatter.RenderEventMessage(writer, e)));
 
                 var propStruct = new Struct();
-                foreach (var property in e.Properties)
+                var hasOriginalFormat = false;
+                foreach (var property in e.Properties) {
+                    if (property.Key == OriginalFormat) {
+                        hasOriginalFormat = true;
+                    }
                     _logFormatter.WritePropertyAsJson(entry, propStruct, property.Key, property.Value);
+                }
+
+                if (_writeOriginalFormat && !hasOriginalFormat) {
+                    _logFormatter.WritePropertyAsJson(entry, propStruct, OriginalFormat, new ScalarValue(e.MessageTemplate.Text));
+                }
 
                 entry.JsonPayload.Fields.Add("properties", Value.ForStruct(propStruct));
 
@@ -101,8 +113,17 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 // text output is simple stringification
                 entry.TextPayload = _logFormatter.RenderEventMessage(writer, e);
 
-                foreach (var property in e.Properties)
+                var hasOriginalFormat = false;
+                foreach (var property in e.Properties) {
+                    if (property.Key == OriginalFormat) {
+                        hasOriginalFormat = true;
+                    }
                     _logFormatter.WritePropertyAsLabel(entry, property.Key, property.Value);
+                }
+
+                if (_writeOriginalFormat && !hasOriginalFormat) {
+                    _logFormatter.WritePropertyAsLabel(entry, OriginalFormat, new ScalarValue(e.MessageTemplate.Text));
+                }
             }
 
             return entry;
