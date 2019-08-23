@@ -11,8 +11,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             GoogleCloudLoggingSinkOptions sinkOptions,
             int? batchSizeLimit = null,
             TimeSpan? period = null,
-            string outputTemplate = null
-        )
+            string outputTemplate = null)
         {
             var messageTemplateTextFormatter = String.IsNullOrWhiteSpace(outputTemplate) ? null : new MessageTemplateTextFormatter(outputTemplate, null);
 

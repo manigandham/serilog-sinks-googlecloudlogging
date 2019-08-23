@@ -20,7 +20,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             _messageTemplateTextFormatter = messageTemplateTextFormatter;
         }
 
-        public string RenderEventMessage(StringWriter writer, LogEvent e)
+        public string RenderEventMessage(LogEvent e, StringWriter writer)
         {
             // output template takes priority for formatting event
             if (_messageTemplateTextFormatter != null)

@@ -78,7 +78,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             {
                 // json output builds up a protobuf object that gets serialized in the stackdriver logs
                 entry.JsonPayload = new Struct();
-                entry.JsonPayload.Fields.Add("message", Value.ForString(_logFormatter.RenderEventMessage(writer, e)));
+                entry.JsonPayload.Fields.Add("message", Value.ForString(_logFormatter.RenderEventMessage(e, writer)));
 
                 var propStruct = new Struct();
                 foreach (var property in e.Properties)
@@ -99,7 +99,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             else
             {
                 // text output is simple stringification
-                entry.TextPayload = _logFormatter.RenderEventMessage(writer, e);
+                entry.TextPayload = _logFormatter.RenderEventMessage(e, writer);
 
                 foreach (var property in e.Properties)
                     _logFormatter.WritePropertyAsLabel(entry, property.Key, property.Value);
