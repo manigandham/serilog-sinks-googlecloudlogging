@@ -11,12 +11,14 @@ namespace Serilog.Sinks.GoogleCloudLogging
 {
     internal class LogFormatter
     {
-        private readonly GoogleCloudLoggingSinkOptions _sinkOptions;
+        private readonly string _projectId;
+        private readonly bool _useSourceContextAsLogName;
         private readonly MessageTemplateTextFormatter _messageTemplateTextFormatter;
 
-        public LogFormatter(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter messageTemplateTextFormatter)
+        public LogFormatter(string projectId, bool useSourceContextAsLogName, MessageTemplateTextFormatter messageTemplateTextFormatter)
         {
-            _sinkOptions = sinkOptions;
+            _projectId = projectId;
+            _useSourceContextAsLogName = useSourceContextAsLogName;
             _messageTemplateTextFormatter = messageTemplateTextFormatter;
         }
 
@@ -151,8 +153,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
         private void CheckIfSourceContext(LogEntry log, string propertyKey, string stringValue)
         {
-            if (_sinkOptions.UseSourceContextAsLogName && propertyKey.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
-                log.LogName = new LogName(_sinkOptions.ProjectId, stringValue).ToString();
+            if (_useSourceContextAsLogName && propertyKey.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
+                log.LogName = new LogName(_projectId, stringValue).ToString();
         }
     }
 }

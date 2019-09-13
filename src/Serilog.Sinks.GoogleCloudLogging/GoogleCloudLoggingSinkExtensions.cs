@@ -32,7 +32,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// </summary>
         public static LoggerConfiguration GoogleCloudLogging(
             this LoggerSinkConfiguration loggerConfiguration,
-            string projectId,
+            string projectId = null,
             string resourceType = null,
             string logName = null,
             Dictionary<string, string> labels = null,

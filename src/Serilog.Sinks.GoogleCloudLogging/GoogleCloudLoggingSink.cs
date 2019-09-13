@@ -44,7 +44,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
             }
 
             _sinkOptions = sinkOptions;
-            _logFormatter = new LogFormatter(_sinkOptions, messageTemplateTextFormatter);
 
             var platform = Platform.Instance();
 
@@ -52,10 +51,13 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 ? new MonitoredResource { Type = sinkOptions.ResourceType }
                 : MonitoredResourceBuilder.FromPlatform(platform);
 
+            var projectId = _sinkOptions.ProjectId ?? _resource.Labels["project_id"];
+            _logFormatter = new LogFormatter(projectId, _sinkOptions.UseSourceContextAsLogName, messageTemplateTextFormatter);
+
             foreach (var kvp in _sinkOptions.ResourceLabels)
                 _resource.Labels[kvp.Key] = kvp.Value;
 
-            var ln = new LogName(sinkOptions.ProjectId, sinkOptions.LogName);
+            var ln = new LogName(projectId, sinkOptions.LogName);
             _logName = ln.ToString();
             _logNameToWrite = LogNameOneof.From(ln);
 
