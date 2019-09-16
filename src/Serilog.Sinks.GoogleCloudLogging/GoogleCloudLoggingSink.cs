@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Google.Api;
+using Google.Api.Gax;
+using Google.Api.Gax.Grpc;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Logging.Type;
 using Google.Cloud.Logging.V2;
@@ -42,13 +44,20 @@ namespace Serilog.Sinks.GoogleCloudLogging
             }
 
             _sinkOptions = sinkOptions;
-            _logFormatter = new LogFormatter(_sinkOptions, messageTemplateTextFormatter);
 
-            _resource = new MonitoredResource { Type = sinkOptions.ResourceType };
+            var platform = Platform.Instance();
+
+            _resource = platform.Type == PlatformType.Unknown
+                ? new MonitoredResource { Type = sinkOptions.ResourceType }
+                : MonitoredResourceBuilder.FromPlatform(platform);
+
+            var projectId = _sinkOptions.ProjectId ?? _resource.Labels["project_id"];
+            _logFormatter = new LogFormatter(projectId, _sinkOptions.UseSourceContextAsLogName, messageTemplateTextFormatter);
+
             foreach (var kvp in _sinkOptions.ResourceLabels)
                 _resource.Labels[kvp.Key] = kvp.Value;
 
-            var ln = new LogName(sinkOptions.ProjectId, sinkOptions.LogName);
+            var ln = new LogName(projectId, sinkOptions.LogName);
             _logName = ln.ToString();
             _logNameToWrite = LogNameOneof.From(ln);
 
