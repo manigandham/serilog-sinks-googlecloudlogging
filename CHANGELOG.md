@@ -1,10 +1,14 @@
 # Changelog
 
+## 2.1.0
+- Resource type is no longer required and will be automatically discovered if program is running in GCP (AppEngine, GCE, GKE, etc).
+- Project ID is no longer required and will be automatically set to the host project if program is running in GCP.
+
 ## 2.0.0
 - Breaking: `ErrorReportingServiceName` and `ErrorReportingServiceVersion` config options changed to `ServiceName` and `ServiceVersion`.
 - Service name and version metadata will be added to all log entries, and will allow exceptions at any level to be picked up by StackDriver error reporting.
 - Improved log formatting and excepting handling.
-- Better preformance and less allocations.
+- Better performance and less allocations.
 
 ## 1.10.0
 - Fixed bug if there is no exception attached for "Error" entry.
