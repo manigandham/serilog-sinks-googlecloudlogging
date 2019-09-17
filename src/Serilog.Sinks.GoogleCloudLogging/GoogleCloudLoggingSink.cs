@@ -30,6 +30,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter messageTemplateTextFormatter, int batchSizeLimit, TimeSpan period)
             : base(batchSizeLimit, period)
         {
+            _sinkOptions = sinkOptions;
+
             // logging client for google cloud apis
             // requires extra setup if credentials are passed as raw json text
             if (sinkOptions.GoogleCredentialJson == null)
@@ -43,35 +45,32 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 _client = LoggingServiceV2Client.Create(channel);
             }
 
-            _sinkOptions = sinkOptions;
-
+            // retrieve current environment details (gke/gce/appengine) from google libraries automatically
+            // or fallback to provided option
             var platform = Platform.Instance();
-
             _resource = platform.Type == PlatformType.Unknown
                 ? new MonitoredResource { Type = sinkOptions.ResourceType }
                 : MonitoredResourceBuilder.FromPlatform(platform);
 
-            var projectId = _sinkOptions.ProjectId ?? _resource.Labels["project_id"];
-            _logFormatter = new LogFormatter(projectId, _sinkOptions.UseSourceContextAsLogName, messageTemplateTextFormatter);
-
             foreach (var kvp in _sinkOptions.ResourceLabels)
                 _resource.Labels[kvp.Key] = kvp.Value;
-
+            
+            // use explicit project id or fallback to project id found in platform environment details above
+            var projectId = _sinkOptions.ProjectId ?? _resource.Labels["project_id"];
             var ln = new LogName(projectId, sinkOptions.LogName);
             _logName = ln.ToString();
             _logNameToWrite = LogNameOneof.From(ln);
 
             _serviceNameAvailable = !String.IsNullOrWhiteSpace(_sinkOptions.ServiceName);
+            _logFormatter = new LogFormatter(projectId, _sinkOptions.UseSourceContextAsLogName, messageTemplateTextFormatter);
         }
 
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
         {
-            using (var writer = new StringWriter())
-            {
-                var entries = events.Select(e => CreateLogEntry(e, writer)).ToList();
-                if (entries.Count > 0)
-                    await _client.WriteLogEntriesAsync(_logNameToWrite, _resource, _sinkOptions.Labels, entries);
-            }
+            using var writer = new StringWriter();
+            var entries = events.Select(e => CreateLogEntry(e, writer)).ToList();
+            if (entries.Count > 0)
+                await _client.WriteLogEntriesAsync(_logNameToWrite, _resource, _sinkOptions.Labels, entries);
         }
 
         private LogEntry CreateLogEntry(LogEvent e, StringWriter writer)
@@ -85,7 +84,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
             if (_sinkOptions.UseJsonOutput)
             {
-                // json output builds up a protobuf object that gets serialized in the stackdriver logs
+                // json output builds up a protobuf object to be serialized in stackdriver logs
                 entry.JsonPayload = new Struct();
                 entry.JsonPayload.Fields.Add("message", Value.ForString(_logFormatter.RenderEventMessage(e, writer)));
 
@@ -117,18 +116,15 @@ namespace Serilog.Sinks.GoogleCloudLogging
             return entry;
         }
 
-        private static LogSeverity TranslateSeverity(LogEventLevel level)
+        private static LogSeverity TranslateSeverity(LogEventLevel level) => level switch
         {
-            switch (level)
-            {
-                case LogEventLevel.Verbose:
-                case LogEventLevel.Debug: return LogSeverity.Debug;
-                case LogEventLevel.Information: return LogSeverity.Info;
-                case LogEventLevel.Warning: return LogSeverity.Warning;
-                case LogEventLevel.Error: return LogSeverity.Error;
-                case LogEventLevel.Fatal: return LogSeverity.Critical;
-                default: return LogSeverity.Default;
-            }
-        }
+            LogEventLevel.Verbose => LogSeverity.Debug,
+            LogEventLevel.Debug => LogSeverity.Debug,
+            LogEventLevel.Information => LogSeverity.Info,
+            LogEventLevel.Warning => LogSeverity.Warning,
+            LogEventLevel.Error => LogSeverity.Error,
+            LogEventLevel.Fatal => LogSeverity.Critical,
+            _ => LogSeverity.Default
+        };
     }
 }

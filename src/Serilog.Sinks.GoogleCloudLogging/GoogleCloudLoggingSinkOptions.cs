@@ -5,17 +5,21 @@ namespace Serilog.Sinks.GoogleCloudLogging
     public class GoogleCloudLoggingSinkOptions
     {
         /// <summary>
-        /// ID (not name) of Google Cloud project where logs will be sent. 
+        /// ID (not name) of Google Cloud Platform project where logs will be sent.
+        /// If not set, will be automatically sent to the project ID hosting the program if running in GCP.
+        /// Required if running elsewhere or to override the destination.
         /// </summary>
         public string ProjectId { get; set; }
 
         /// <summary>
-        /// Resource type for logs. Default is "global" which shows as "Global" in Google Cloud Console UI.
+        /// Resource type for logs.
+        /// Will be automatically identified if running in GCP, otherwise default is "global" which shows as "Global" in Google Cloud Console UI.
         /// </summary>
         public string ResourceType { get; set; }
 
         /// <summary>
-        /// Name of individual log. Will be set to `SourceContext` property automatically from Serilog context if it's available or fallback to this setting. Default is "Default".
+        /// Name of individual log.
+        /// Will be set to `SourceContext` property automatically from Serilog context if available, or fallback to this setting. Default is "Default".
         /// </summary>
         public string LogName { get; set; }
 
