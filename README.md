@@ -55,9 +55,9 @@ This library uses the [`Google-Cloud-Dotnet`](https://googleapis.github.io/googl
 
 Name | Default | Description
 ---- | ------- | -----------
-`ProjectId` (required)| | Google Cloud project ID where logs will be sent. Will be automatically set to host project if running in GCP, otherwise required.  
-`ResourceType` (required) | `global` | Resource type for all log output. Will be automatically discovered if running in GCP, otherwise required. Must be one of the supported types listed in the  [cloud logging documentation](https://cloud.google.com/logging/docs/api/v2/resource-list).
-`LogName` (required) | `Default` | Name of the log.
+`ProjectId` | | Google Cloud project ID where logs will be sent. Will be automatically set to host project if running in GCP, otherwise required.  
+`ResourceType` | `global` | Resource type for all log output. Will be automatically discovered if running in GCP, otherwise required. Must be one of the supported types listed in the  [cloud logging documentation](https://cloud.google.com/logging/docs/api/v2/resource-list).
+`LogName` | `Default` | Name of the log. This is required if `UseSourceContextAsLogName` is false.
 `Labels` | | `Dictionary<string, string>` of properties added to all log entries.
 `ResourceLabels` | | `Dictionary<string, string>` of properties added to all log entries, at the resource level. See [Monitored Resources and Services](https://cloud.google.com/logging/docs/api/v2/resource-list) for recognized labels.
 `UseSourceContextAsLogName` | True | The log name for a log entry will be set to the [SourceContext](https://github.com/serilog/serilog/wiki/Writing-Log-Events#source-contexts) property if it's available.
