@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.1
+- `netstandard2.0` added to target frameworks to reduce dependency graph in newer platforms. See guidance at https://docs.microsoft.com/en-us/dotnet/standard/library-guidance/cross-platform-targeting
+- Replaced `ProjectIconUrl` with local `ProjectIcon` in `csproj` file for nuget packaging.
+
 ## 2.1.0
 - Resource type is no longer required and will be automatically discovered if program is running in GCP (AppEngine, GCE, GKE, etc).
 - Project ID is no longer required and will be automatically set to the host project if program is running in GCP.

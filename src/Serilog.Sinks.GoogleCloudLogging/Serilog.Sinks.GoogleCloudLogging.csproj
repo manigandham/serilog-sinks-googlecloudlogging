@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.5</TargetFramework>
+    <TargetFrameworks>netstandard1.5;netstandard2.0</TargetFrameworks>
     <Description>Serilog sink that writes events to Google Cloud Platform Stackdriver Logging.</Description>
     <Authors>Mani Gandham</Authors>
     <PackageLicense>MIT</PackageLicense>
     <PackageProjectUrl>https://github.com/manigandham/serilog-sinks-googlecloudlogging</PackageProjectUrl>
-    <PackageIconUrl>https://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
+    <PackageIcon>serilog-sink-nuget.png</PackageIcon>
     <PackageTags>serilog; sink; google cloud; stackdriver; logging;</PackageTags>
     <RepositoryUrl>https://github.com/manigandham/serilog-sinks-googlecloudlogging</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -14,10 +14,14 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.1.0</Version>
+    <Version>2.1.1</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <LangVersion>8</LangVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="serilog-sink-nuget.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Google.Cloud.Logging.V2" Version="2.2.0" />
