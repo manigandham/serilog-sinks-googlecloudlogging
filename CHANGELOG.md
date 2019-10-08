@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.2.0
+- Resource type will use explicitly defined option, or will be automatically discovered with a fallback to Global.
+
 ## 2.1.1
 - `netstandard2.0` added to target frameworks to reduce dependency graph in newer platforms. See guidance at https://docs.microsoft.com/en-us/dotnet/standard/library-guidance/cross-platform-targeting
 - Replaced `ProjectIconUrl` with local `ProjectIcon` in `csproj` file for nuget packaging.
