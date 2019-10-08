@@ -12,8 +12,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public string ProjectId { get; set; }
 
         /// <summary>
-        /// Resource type for logs.
-        /// Will be automatically identified if running in GCP, otherwise default is "global" which shows as "Global" in Google Cloud Console UI.
+        /// Resource type for logs, one of (https://cloud.google.com/logging/docs/api/v2/resource-list).
+        /// If value not provided then if running in GCP it will be automatically identified, otherwise default is "global" which shows as "Global" in Google Cloud Console UI.
         /// </summary>
         public string ResourceType { get; set; }
 
@@ -90,7 +90,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         )
         {
             ProjectId = projectId;
-            ResourceType = resourceType ?? "global";
+            ResourceType = resourceType;
             LogName = logName ?? "Default";
 
             if (labels != null)

@@ -46,11 +46,16 @@ namespace Serilog.Sinks.GoogleCloudLogging
             }
 
             // retrieve current environment details (gke/gce/appengine) from google libraries automatically
-            // or fallback to provided option
+            // or fallback to Global resource.
             var platform = Platform.Instance();
+
             _resource = platform.Type == PlatformType.Unknown
-                ? new MonitoredResource { Type = sinkOptions.ResourceType }
+                ? MonitoredResourceBuilder.GlobalResource
                 : MonitoredResourceBuilder.FromPlatform(platform);
+
+            // if ResourceType has been explicitly set then use it.
+            if (sinkOptions.ResourceType != null)
+                _resource.Type = sinkOptions.ResourceType;
 
             foreach (var kvp in _sinkOptions.ResourceLabels)
                 _resource.Labels[kvp.Key] = kvp.Value;
