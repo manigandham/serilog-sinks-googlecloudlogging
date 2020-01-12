@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.2.1
+- Update nuget references to latest versions.
+
 ## 2.2.0
 - Resource type will use explicitly defined option, or will be automatically discovered with a fallback to Global.
 
