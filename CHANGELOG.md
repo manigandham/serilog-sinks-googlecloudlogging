@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.3.0
+- Automatically format log names to match requirements (trim unsafe characters and use url-encoding).
+
 ## 2.2.1
 - Update nuget references to latest versions.
 
