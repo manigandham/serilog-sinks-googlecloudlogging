@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Google.Api;
 using Google.Api.Gax;
@@ -22,11 +23,10 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly GoogleCloudLoggingSinkOptions _sinkOptions;
         private readonly LoggingServiceV2Client _client;
         private readonly string _logName;
-        private readonly LogNameOneof _logNameToWrite;
         private readonly MonitoredResource _resource;
         private readonly bool _serviceNameAvailable;
         private readonly LogFormatter _logFormatter;
-
+        
         public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter messageTemplateTextFormatter, int batchSizeLimit, TimeSpan period)
             : base(batchSizeLimit, period)
         {
@@ -46,25 +46,22 @@ namespace Serilog.Sinks.GoogleCloudLogging
             }
 
             // retrieve current environment details (gke/gce/appengine) from google libraries automatically
-            // or fallback to Global resource.
+            // or fallback to "Global" resource
             var platform = Platform.Instance();
 
             _resource = platform.Type == PlatformType.Unknown
                 ? MonitoredResourceBuilder.GlobalResource
                 : MonitoredResourceBuilder.FromPlatform(platform);
 
-            // if ResourceType has been explicitly set then use it.
-            if (sinkOptions.ResourceType != null)
-                _resource.Type = sinkOptions.ResourceType;
-
             foreach (var kvp in _sinkOptions.ResourceLabels)
                 _resource.Labels[kvp.Key] = kvp.Value;
-            
-            // use explicit project id or fallback to project id found in platform environment details above
+
+            // use explicit ResourceType if set
+            _resource.Type = sinkOptions.ResourceType ?? _resource.Type;
+
+            // use explicit project ID or fallback to project ID found in platform environment details above
             var projectId = _sinkOptions.ProjectId ?? _resource.Labels["project_id"];
-            var ln = new LogName(projectId, sinkOptions.LogName);
-            _logName = ln.ToString();
-            _logNameToWrite = LogNameOneof.From(ln);
+            _logName = LogFormatter.CreateLogName(projectId, sinkOptions.LogName);
 
             _serviceNameAvailable = !String.IsNullOrWhiteSpace(_sinkOptions.ServiceName);
             _logFormatter = new LogFormatter(projectId, _sinkOptions.UseSourceContextAsLogName, messageTemplateTextFormatter);
@@ -75,7 +72,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             using var writer = new StringWriter();
             var entries = events.Select(e => CreateLogEntry(e, writer)).ToList();
             if (entries.Count > 0)
-                await _client.WriteLogEntriesAsync(_logNameToWrite, _resource, _sinkOptions.Labels, entries);
+                await _client.WriteLogEntriesAsync((LogNameOneof) null, _resource, _sinkOptions.Labels, entries, CancellationToken.None);
         }
 
         private LogEntry CreateLogEntry(LogEvent e, StringWriter writer)

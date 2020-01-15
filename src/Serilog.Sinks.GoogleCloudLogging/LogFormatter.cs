@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 using Google.Cloud.Logging.V2;
 using Google.Protobuf.WellKnownTypes;
 using Serilog.Events;
@@ -14,6 +16,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly string _projectId;
         private readonly bool _useSourceContextAsLogName;
         private readonly MessageTemplateTextFormatter _messageTemplateTextFormatter;
+
+        private static readonly Regex LogNameUnsafeChars = new Regex("[^0-9A-Z._/-]+", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
 
         public LogFormatter(string projectId, bool useSourceContextAsLogName, MessageTemplateTextFormatter messageTemplateTextFormatter)
         {
@@ -154,7 +158,18 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private void CheckIfSourceContext(LogEntry log, string propertyKey, string stringValue)
         {
             if (_useSourceContextAsLogName && propertyKey.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
-                log.LogName = new LogName(_projectId, stringValue).ToString();
+                log.LogName = CreateLogName(_projectId, stringValue);
+        }
+
+        public static string CreateLogName(string projectId, string name)
+        {
+            // name must only contain letters, numbers, underscore, hyphen, forward slash and period
+            // limited to 512 characters and must be url-encoded
+            var safeChars = LogNameUnsafeChars.Replace(name, String.Empty);
+            var clean = UrlEncoder.Default.Encode(safeChars);
+            
+            // LogName class creates templated string matching GCP requirements
+            return new LogName(projectId, clean).ToString();
         }
     }
 }
