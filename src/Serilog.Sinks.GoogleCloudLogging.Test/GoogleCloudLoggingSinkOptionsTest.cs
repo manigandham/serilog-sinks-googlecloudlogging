@@ -24,7 +24,7 @@ namespace Serilog.Sinks.GoogleCloudLogging.Test
                     ServiceName = null,
                     ServiceVersion = "<Unknown>",
                     UseJsonOutput = false,
-                    UseSourceContextAsLogName = false,
+                    UseSourceContextAsLogName = true,
                 });
         }
 
