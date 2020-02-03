@@ -37,11 +37,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
             }
 
             // otherwise manually format message and handle exceptions
-            var lines = new List<string>();
-            var msg = e.RenderMessage();
-            if (!String.IsNullOrWhiteSpace(msg))
-                lines.Add(msg);
-
+            string msg = e.RenderMessage();
+            string exceptionMessage = null; 
             if (e.Exception != null)
             {
                 //if (e.Exception.GetType() == typeof(AggregateException))
@@ -50,10 +47,26 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 //    lines.AddRange(((AggregateException) e.Exception).Flatten().InnerExceptions.Select(s => s.Message));
                 //}
 
-                lines.Add(e.Exception.ToString());
+                exceptionMessage = e.Exception.ToString();
             }
 
-            return String.Join("\n", lines);
+            bool hasMsg = !String.IsNullOrWhiteSpace(msg);
+            bool hasExc = !String.IsNullOrWhiteSpace(exceptionMessage);
+            if (hasMsg && hasExc)
+            {
+                return msg + "\n" + exceptionMessage;
+            }
+            if (hasMsg)
+            {
+                return msg;
+            }
+
+            if(hasExc)
+            {
+                return exceptionMessage;
+            }
+
+            return String.Empty;
         }
 
         /// <summary>
