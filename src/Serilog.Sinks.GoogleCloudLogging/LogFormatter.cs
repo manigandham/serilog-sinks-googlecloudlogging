@@ -17,6 +17,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly bool _useSourceContextAsLogName;
         private readonly MessageTemplateTextFormatter _messageTemplateTextFormatter;
 
+        private static readonly Dictionary<string, string> LogNameCache = new Dictionary<string, string>(StringComparer.Ordinal);
         private static readonly Regex LogNameUnsafeChars = new Regex("[^0-9A-Z._/-]+", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
 
         public LogFormatter(string projectId, bool useSourceContextAsLogName, MessageTemplateTextFormatter messageTemplateTextFormatter)
@@ -28,45 +29,29 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
         public string RenderEventMessage(LogEvent e, StringWriter writer)
         {
+            writer.GetStringBuilder().Clear();
+
             // output template takes priority for formatting event
             if (_messageTemplateTextFormatter != null)
             {
-                writer.GetStringBuilder().Clear();
                 _messageTemplateTextFormatter.Format(e, writer);
-                return writer.ToString();
             }
-
-            // otherwise manually format message and handle exceptions
-            string msg = e.RenderMessage();
-            string exceptionMessage = null; 
-            if (e.Exception != null)
+            else
             {
-                //if (e.Exception.GetType() == typeof(AggregateException))
-                //{
-                //    // ErrorReporting won't report all InnerExceptions for an AggregateException. This work-around isn't perfect but better than the default behavior
-                //    lines.AddRange(((AggregateException) e.Exception).Flatten().InnerExceptions.Select(s => s.Message));
-                //}
+                // otherwise manually format message and handle exceptions
+                e.RenderMessage(writer);
 
-                exceptionMessage = e.Exception.ToString();
+                if (e.Exception != null)
+                {
+                    // check the current message length and add new line before exception stack trace if needed
+                    if (writer.GetStringBuilder().Length > 0)
+                        writer.WriteLine();
+
+                    writer.Write(e.Exception.ToString());
+                }
             }
 
-            bool hasMsg = !String.IsNullOrWhiteSpace(msg);
-            bool hasExc = !String.IsNullOrWhiteSpace(exceptionMessage);
-            if (hasMsg && hasExc)
-            {
-                return msg + "\n" + exceptionMessage;
-            }
-            if (hasMsg)
-            {
-                return msg;
-            }
-
-            if(hasExc)
-            {
-                return exceptionMessage;
-            }
-
-            return String.Empty;
+            return writer.ToString();
         }
 
         /// <summary>
@@ -176,13 +161,21 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
         public static string CreateLogName(string projectId, string name)
         {
-            // name must only contain letters, numbers, underscore, hyphen, forward slash and period
-            // limited to 512 characters and must be url-encoded
-            var safeChars = LogNameUnsafeChars.Replace(name, String.Empty);
-            var clean = UrlEncoder.Default.Encode(safeChars);
-            
-            // LogName class creates templated string matching GCP requirements
-            return new LogName(projectId, clean).ToString();
+            // check cache first to avoid formatting name for every log statement
+            if (!LogNameCache.TryGetValue(name, out var logName))
+            {
+                // name must only contain letters, numbers, underscore, hyphen, forward slash and period
+                // limited to 512 characters and must be url-encoded
+                var safeChars = LogNameUnsafeChars.Replace(name, String.Empty);
+                var clean = UrlEncoder.Default.Encode(safeChars);
+
+                // LogName class creates templated string matching GCP requirements
+                logName = new LogName(projectId, clean).ToString();
+
+                LogNameCache.Add(name, logName);
+            }
+
+            return logName;
         }
     }
 }

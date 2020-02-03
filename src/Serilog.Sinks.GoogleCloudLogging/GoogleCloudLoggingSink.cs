@@ -26,7 +26,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly MonitoredResource _resource;
         private readonly bool _serviceNameAvailable;
         private readonly LogFormatter _logFormatter;
-        
+
         public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter messageTemplateTextFormatter, int batchSizeLimit, TimeSpan period)
             : base(batchSizeLimit, period)
         {
@@ -46,9 +46,9 @@ namespace Serilog.Sinks.GoogleCloudLogging
             }
 
             // retrieve current environment details (gke/gce/appengine) from google libraries automatically
-            // or fallback to "Global" resource
             var platform = Platform.Instance();
 
+            // resource can be extracted from environment details or fallback to "Global" resource
             _resource = platform.Type == PlatformType.Unknown
                 ? MonitoredResourceBuilder.GlobalResource
                 : MonitoredResourceBuilder.FromPlatform(platform);
@@ -60,19 +60,22 @@ namespace Serilog.Sinks.GoogleCloudLogging
             _resource.Type = sinkOptions.ResourceType ?? _resource.Type;
 
             // use explicit project ID or fallback to project ID found in platform environment details above
-            var projectId = _sinkOptions.ProjectId ?? _resource.Labels["project_id"];
-            _logName = LogFormatter.CreateLogName(projectId, sinkOptions.LogName);
+            var projectId = _sinkOptions.ProjectId ?? platform.ProjectId ?? _resource.Labels["project_id"];
 
-            _serviceNameAvailable = !String.IsNullOrWhiteSpace(_sinkOptions.ServiceName);
+            _logName = LogFormatter.CreateLogName(projectId, sinkOptions.LogName);
             _logFormatter = new LogFormatter(projectId, _sinkOptions.UseSourceContextAsLogName, messageTemplateTextFormatter);
+            _serviceNameAvailable = !String.IsNullOrWhiteSpace(_sinkOptions.ServiceName);
         }
 
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
         {
             using var writer = new StringWriter();
-            var entries = events.Select(e => CreateLogEntry(e, writer)).ToList();
+            var entries = new List<LogEntry>();
+            foreach(var e in events)
+                entries.Add(CreateLogEntry(e, writer));
+
             if (entries.Count > 0)
-                await _client.WriteLogEntriesAsync((LogNameOneof) null, _resource, _sinkOptions.Labels, entries, CancellationToken.None);
+                await _client.WriteLogEntriesAsync((LogNameOneof)null, _resource, _sinkOptions.Labels, entries, CancellationToken.None);
         }
 
         private LogEntry CreateLogEntry(LogEvent e, StringWriter writer)

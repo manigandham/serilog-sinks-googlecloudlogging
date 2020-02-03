@@ -32,15 +32,16 @@ namespace Serilog.Sinks.GoogleCloudLogging.Test
         public void WillCorrectlyAssignAllConstructorArguments()
         {
             var options = new GoogleCloudLoggingSinkOptions(projectId: "projectId",
-                                            resourceType: "k8s_pod",
-                                            logName: "logName",
-                                            labels: new Dictionary<string, string> { { "labelKey", "label value" } },
-                                            resourceLabels: new Dictionary<string, string> { { "resourceKey", "resource value" } },
-                                            useSourceContextAsLogName: false,
-                                            useJsonOutput: true,
-                                            googleCredentialJson: "{}",
-                                            serviceName: "service-name",
-                                            serviceVersion: "1.0.1");
+                resourceType: "k8s_pod",
+                logName: "logName",
+                labels: new Dictionary<string, string> { { "labelKey", "label value" } },
+                resourceLabels: new Dictionary<string, string> { { "resourceKey", "resource value" } },
+                useSourceContextAsLogName: false,
+                useJsonOutput: true,
+                googleCredentialJson: "{}",
+                serviceName: "service-name",
+                serviceVersion: "1.0.1");
+
             options
                 .Should()
                 .BeEquivalentTo(new GoogleCloudLoggingSinkOptions
