@@ -161,7 +161,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
         public static string CreateLogName(string projectId, string name)
         {
-            // check cache first to avoid formatting name for every log statement
+            // cache log name to avoid formatting name for every statement
+            // TODO: potential memory leak because cached names are never cleared, however shouldnt be an issue even with thousands of entries
             if (!LogNameCache.TryGetValue(name, out var logName))
             {
                 // name must only contain letters, numbers, underscore, hyphen, forward slash and period
