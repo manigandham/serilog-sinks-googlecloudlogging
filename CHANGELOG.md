@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.4.0
+- Improved logging performance (`StringWriter` reuse) and cache log names (using a static dictionary).
+
 ## 2.3.0
 - Automatically format log names to match requirements (trim unsafe characters and use url-encoding).
 
