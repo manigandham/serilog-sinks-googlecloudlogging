@@ -76,6 +76,19 @@ If `UseJsonOutput` is set to true, the output will be sent as `JsonPayload` to m
 
 WARNING: JSON output only accepts numeric values as `double` so all numbers will be converted. Large integers and floating-point values will lose precision. If you want the exact value preserved then log it as a string instead.
 
+#### Log Level Mapping
+
+This table shows the mapping from Serilog [`LogLevel`](https://github.com/serilog/serilog/wiki/Configuration-Basics#minimum-level) to Stackdriver [`LogSeverity`](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity)
+
+Serilog | Stackdriver
+------------- | -----------------
+Verbose | Debug
+Debug | Debug
+Information | Info
+Warning | Warning
+Error | Error
+Fatal | Critical
+
 ## Viewing Logs
 
 Logs will appear in the Google Cloud Console Log Viewer: https://console.cloud.google.com/logs/viewer
