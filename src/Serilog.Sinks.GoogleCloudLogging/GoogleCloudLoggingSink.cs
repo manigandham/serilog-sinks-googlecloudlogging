@@ -40,9 +40,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             }
             else
             {
-                var googleCredential = GoogleCredential.FromJson(sinkOptions.GoogleCredentialJson);
-                var channel = new Grpc.Core.Channel(LoggingServiceV2Client.DefaultEndpoint.Host, googleCredential.ToChannelCredentials());
-                _client = LoggingServiceV2Client.Create(channel);
+                _client = new LoggingServiceV2ClientBuilder { JsonCredentials = sinkOptions.GoogleCredentialJson }.Build();
             }
 
             // retrieve current environment details (gke/gce/appengine) from google libraries automatically
