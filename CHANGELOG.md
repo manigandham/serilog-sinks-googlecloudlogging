@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.4.1
+- Updated to simpler GCP `LoggingServiceV2Client` instantiation for better compatibility with latest libraries.
+
 ## 2.4.0
 - Improved logging performance (`StringWriter` reuse) and cache log names (using a static dictionary).
 
