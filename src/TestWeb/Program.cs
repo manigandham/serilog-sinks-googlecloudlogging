@@ -53,11 +53,19 @@ namespace TestWeb
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .ConfigureServices(services => services.AddMvc())
+                .ConfigureServices(services =>
+                {
+                    services.AddRouting();
+                    services.AddMvc();
+                })
                 .Configure(app =>
                 {
                     app.UseDeveloperExceptionPage();
-                    app.UseMvcWithDefaultRoute();
+                    app.UseRouting();
+                    app.UseEndpoints(builder =>
+                    {
+                        builder.MapDefaultControllerRoute();
+                    });
                 })
                 .UseSerilog() // Add this to send all built-in logging to Serilog
                 .Build();
