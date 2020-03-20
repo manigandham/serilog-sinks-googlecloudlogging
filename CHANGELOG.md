@@ -1,7 +1,7 @@
 # Changelog
 
 ## 3.0.0
-- Updated `Google.Cloud.Logging.V2` reference to 3.0.0. This drops support for `netstandard1.5`.
+- Updated Nuget references including `Google.Cloud.Logging.V2` to 3.0.0. This drops support for `netstandard1.5`.
 
 ## 2.4.1
 - Updated to simpler GCP `LoggingServiceV2Client` instantiation for better compatibility with latest libraries.

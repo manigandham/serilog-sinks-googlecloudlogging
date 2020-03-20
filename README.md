@@ -2,6 +2,8 @@
 
 Serilog sink that writes events to [Google Cloud Platform Stackdriver Logging](https://cloud.google.com/logging/). 
 
+Built for `netstandard2.0` 
+
 Release notes here: [CHANGELOG.md](CHANGELOG.md)
 
 ## Getting started
