@@ -73,7 +73,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 entries.Add(CreateLogEntry(e, writer));
 
             if (entries.Count > 0)
-                await _client.WriteLogEntriesAsync((LogNameOneof)null, _resource, _sinkOptions.Labels, entries, CancellationToken.None);
+                await _client.WriteLogEntriesAsync((LogName)null, _resource, _sinkOptions.Labels, entries, CancellationToken.None);
         }
 
         private LogEntry CreateLogEntry(LogEvent e, StringWriter writer)
