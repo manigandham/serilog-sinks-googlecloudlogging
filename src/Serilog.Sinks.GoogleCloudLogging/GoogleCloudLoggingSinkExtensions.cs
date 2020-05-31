@@ -13,6 +13,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             GoogleCloudLoggingSinkOptions sinkOptions,
             int? batchSizeLimit = null,
             TimeSpan? period = null,
+            int? queueLimit = null,
             string outputTemplate = null)
         {
             var messageTemplateTextFormatter = String.IsNullOrWhiteSpace(outputTemplate) ? null : new MessageTemplateTextFormatter(outputTemplate, null);
@@ -25,7 +26,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
             var batchingOptions = new PeriodicBatchingSinkOptions
             {
                 BatchSizeLimit = batchSizeLimit ?? 100,
-                Period = period ?? TimeSpan.FromSeconds(5)
+                Period = period ?? TimeSpan.FromSeconds(5),
+                QueueLimit = queueLimit
             };
 
             var batchingSink = new PeriodicBatchingSink(sink, batchingOptions);
@@ -51,6 +53,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             string serviceVersion = null,
             int? batchSizeLimit = null,
             TimeSpan? period = null,
+            int? queueLimit = null,
             string outputTemplate = null
         )
         {
@@ -67,7 +70,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 serviceVersion
             );
 
-            return loggerConfiguration.GoogleCloudLogging(options, batchSizeLimit, period, outputTemplate);
+            return loggerConfiguration.GoogleCloudLogging(options, batchSizeLimit, period, queueLimit, outputTemplate);
         }
     }
 }
