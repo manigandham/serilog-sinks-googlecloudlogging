@@ -1,24 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Api;
 using Google.Api.Gax;
 using Google.Api.Gax.Grpc;
-using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Logging.Type;
 using Google.Cloud.Logging.V2;
 using Google.Protobuf.WellKnownTypes;
-using Grpc.Auth;
 using Serilog.Events;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.GoogleCloudLogging
 {
-    public class GoogleCloudLoggingSink : PeriodicBatchingSink
+    public class GoogleCloudLoggingSink : IBatchedLogEventSink
     {
         private readonly GoogleCloudLoggingSinkOptions _sinkOptions;
         private readonly LoggingServiceV2Client _client;
@@ -27,8 +24,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly bool _serviceNameAvailable;
         private readonly LogFormatter _logFormatter;
 
-        public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter messageTemplateTextFormatter, int batchSizeLimit, TimeSpan period)
-            : base(batchSizeLimit, period)
+        public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter messageTemplateTextFormatter)
         {
             _sinkOptions = sinkOptions;
 
@@ -65,7 +61,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             _serviceNameAvailable = !String.IsNullOrWhiteSpace(_sinkOptions.ServiceName);
         }
 
-        protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
+        protected async Task EmitBatchAsync(IEnumerable<LogEvent> events)
         {
             using var writer = new StringWriter();
             var entries = new List<LogEntry>();
@@ -129,5 +125,15 @@ namespace Serilog.Sinks.GoogleCloudLogging
             LogEventLevel.Fatal => LogSeverity.Critical,
             _ => LogSeverity.Default
         };
+
+        Task IBatchedLogEventSink.EmitBatchAsync(IEnumerable<LogEvent> batch)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task OnEmptyBatchAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

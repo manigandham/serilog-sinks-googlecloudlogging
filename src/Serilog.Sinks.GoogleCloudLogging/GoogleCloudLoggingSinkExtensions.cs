@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using Serilog.Configuration;
 using Serilog.Formatting.Display;
+using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.GoogleCloudLogging
 {
     public static class GoogleCloudLoggingSinkExtensions
     {
-        public static LoggerConfiguration GoogleCloudLogging(this LoggerSinkConfiguration loggerConfiguration,
+        public static LoggerConfiguration GoogleCloudLogging(
+            this LoggerSinkConfiguration loggerConfiguration,
             GoogleCloudLoggingSinkOptions sinkOptions,
             int? batchSizeLimit = null,
             TimeSpan? period = null,
@@ -17,12 +19,18 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
             var sink = new GoogleCloudLoggingSink(
                 sinkOptions,
-                messageTemplateTextFormatter,
-                batchSizeLimit ?? 100,
-                period ?? TimeSpan.FromSeconds(5)
+                messageTemplateTextFormatter
             );
 
-            return loggerConfiguration.Sink(sink);
+            var batchingOptions = new PeriodicBatchingSinkOptions
+            {
+                BatchSizeLimit = batchSizeLimit ?? 100,
+                Period = period ?? TimeSpan.FromSeconds(5)
+            };
+
+            var batchingSink = new PeriodicBatchingSink(sink, batchingOptions);
+
+            return loggerConfiguration.Sink(batchingSink);
         }
 
         /// <summary>
