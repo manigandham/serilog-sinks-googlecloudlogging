@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.1.0
+- Updated nuget references and used new `IBatchedLogEventSink` interface for `Serilog.Sinks.PeriodicBatching`.
+
 ## 3.0.0
 - Updated Nuget references including `Google.Cloud.Logging.V2` to 3.0.0. This drops support for `netstandard1.5`.
 
