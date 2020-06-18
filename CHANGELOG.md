@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.2.0
+- Bug fix with `IBatchedLogEventSink` implementation.
+
 ## 3.1.0
 - Updated nuget references and used new `IBatchedLogEventSink` interface for `Serilog.Sinks.PeriodicBatching`.
 - Added `QueueSize` parameter for internal batching queue. See [`PeriodicBatchingSinkOptions`](https://github.com/serilog/serilog-sinks-periodicbatching/blob/dev/src/Serilog.Sinks.PeriodicBatching/Sinks/PeriodicBatching/PeriodicBatchingSinkOptions.cs) for details.
