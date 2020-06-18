@@ -61,7 +61,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             _serviceNameAvailable = !String.IsNullOrWhiteSpace(_sinkOptions.ServiceName);
         }
 
-        protected async Task EmitBatchAsync(IEnumerable<LogEvent> events)
+        public Task EmitBatchAsync(IEnumerable<LogEvent> events)
         {
             using var writer = new StringWriter();
             var entries = new List<LogEntry>();
@@ -69,7 +69,9 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 entries.Add(CreateLogEntry(e, writer));
 
             if (entries.Count > 0)
-                await _client.WriteLogEntriesAsync((LogName)null, _resource, _sinkOptions.Labels, entries, CancellationToken.None);
+                return _client.WriteLogEntriesAsync((LogName)null, _resource, _sinkOptions.Labels, entries, CancellationToken.None);
+            
+            return Task.CompletedTask;
         }
 
         private LogEntry CreateLogEntry(LogEvent e, StringWriter writer)
@@ -126,14 +128,9 @@ namespace Serilog.Sinks.GoogleCloudLogging
             _ => LogSeverity.Default
         };
 
-        Task IBatchedLogEventSink.EmitBatchAsync(IEnumerable<LogEvent> batch)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task OnEmptyBatchAsync()
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
     }
 }
