@@ -1,8 +1,8 @@
 # Serilog.Sinks.GoogleCloudLogging
 
-Serilog sink that writes events to [Google Cloud Platform Stackdriver Logging](https://cloud.google.com/logging/). 
+Serilog sink that writes events to [Google Cloud Platform Stackdriver Logging](https://cloud.google.com/logging/).
 
-Built for `netstandard2.0` 
+Built for `netstandard2.0`
 
 Release notes here: [CHANGELOG.md](CHANGELOG.md)
 
@@ -28,7 +28,7 @@ This requires ['serilog-settings-configuration'](https://github.com/serilog/seri
 ```json
 "Serilog": {
   "Using": [ "Serilog.Sinks.GoogleCloudLogging" ],
-  "MinimumLevel": "Warning",
+  "MinimumLevel": "Information",
   "WriteTo": [
     {
       "Name": "GoogleCloudLogging",
@@ -40,7 +40,8 @@ This requires ['serilog-settings-configuration'](https://github.com/serilog/seri
           "project_id": "PROJECT-ID-HERE-12345",
           "location": "LOCATION-STRING-HERE-region-name",
           "cluster_name": "CLUSTER-NAME-HERE-container-cluster"
-        }
+        },
+        "restrictedToMinimumLevel": "Warning"
       }
     }
   ]
@@ -59,7 +60,7 @@ This library uses the [`Google-Cloud-Dotnet`](https://googleapis.github.io/googl
 
 Name | Default | Description
 ---- | ------- | -----------
-`ProjectId` | | Google Cloud project ID where logs will be sent. Will be automatically set to host project if running in GCP, otherwise required.  
+`ProjectId` | | Google Cloud project ID where logs will be sent. Will be automatically set to host project if running in GCP, otherwise required.
 `ResourceType` | `global` | Resource type for all log output. Will be automatically discovered if running in GCP, otherwise required. Must be one of the supported types listed in the  [cloud logging documentation](https://cloud.google.com/logging/docs/api/v2/resource-list).
 `LogName` | `Default` | Name of the log. This is required if `UseSourceContextAsLogName` is false.
 `Labels` | | `Dictionary<string, string>` of properties added to all log entries.
@@ -74,7 +75,7 @@ Name | Default | Description
 
 Serilog uses structured logging which means each log line is a formatting template with attached properties that are combined to create the final output. When `UseJsonOutput` is false, the output is sent as `TextPayload` to GCP with any properties serialized to string key/value labels.
 
-If `UseJsonOutput` is set to true, the output will be sent as `JsonPayload` to maintain the original data types. This is helpful for querying child properties or numeric values in the Log Viewer, and will also capture property names even if they have null values. 
+If `UseJsonOutput` is set to true, the output will be sent as `JsonPayload` to maintain the original data types. This is helpful for querying child properties or numeric values in the Log Viewer, and will also capture property names even if they have null values.
 
 WARNING: JSON output only accepts numeric values as `double` so all numbers will be converted. Large integers and floating-point values will lose precision. If you want the exact value preserved then log it as a string instead.
 
