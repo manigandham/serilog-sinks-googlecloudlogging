@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.0
+- Allow to override minimal logging level configuration property via logging source (using code or `appsettins.json`).
+- Support dynamic level switch for changing the Serilog level at runtime.
+
 ## 3.2.0
 - Bug fix with `IBatchedLogEventSink` implementation.
 
