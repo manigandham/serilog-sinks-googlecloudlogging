@@ -17,13 +17,10 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <param name="sinkOptions">Google Cloud Logging sink options.</param>
         /// <param name="batchSizeLimit">The maximum number of events to include in a single batch. The defailt is 100.</param>
         /// <param name="period">The time to wait between checking for event batches. The default is five seconds.</param>
-        /// <param name="queueLimit">Maximum number of events in the queue. If not specified,
-        /// uses an unbounded queue.</param>
-        /// <param name="outputTemplate">A message template describing the format used to write to the sink .</param>
-        /// <param name="restrictedToMinimumLevel">The minimum level for
-        /// events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
-        /// <param name="levelSwitch">A switch allowing the pass-through minimum level
-        /// to be changed at runtime.</param>
+        /// <param name="queueLimit">Maximum number of events in the queue. If not specified, uses an unbounded queue.</param>
+        /// <param name="outputTemplate">A message template describing the format used to write to the sink.</param>
+        /// <param name="restrictedToMinimumLevel">The minimum level for events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
+        /// <param name="levelSwitch">A switch allowing the pass-through minimum level to be changed at runtime.</param>
         /// <returns>Configuration object allowing method chaining.</returns>
         public static LoggerConfiguration GoogleCloudLogging(
             this LoggerSinkConfiguration loggerConfiguration,
@@ -93,7 +90,14 @@ namespace Serilog.Sinks.GoogleCloudLogging
             );
 
             return loggerConfiguration.GoogleCloudLogging(
-                options, batchSizeLimit, period, queueLimit, outputTemplate, restrictedToMinimumLevel, levelSwitch);
+                options,
+                batchSizeLimit,
+                period,
+                queueLimit,
+                outputTemplate,
+                restrictedToMinimumLevel,
+                levelSwitch
+            );
         }
     }
 }
