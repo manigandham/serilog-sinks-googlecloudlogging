@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.3.1
+- Updated nuget references to latest versions.
+
 ## 3.3.0
 - Added new config property for minimal logging level for sink.
 - Added support for level switch to change minimum logging level at runtime.
@@ -12,7 +15,8 @@
 - Added `QueueSize` parameter for internal batching queue. See [`PeriodicBatchingSinkOptions`](https://github.com/serilog/serilog-sinks-periodicbatching/blob/dev/src/Serilog.Sinks.PeriodicBatching/Sinks/PeriodicBatching/PeriodicBatchingSinkOptions.cs) for details.
 
 ## 3.0.0
-- Updated Nuget references including `Google.Cloud.Logging.V2` to 3.0.0. This drops support for `netstandard1.5`.
+- Updated Nuget references, including `Google.Cloud.Logging.V2` to 3.0.0. 
+- Dropped support for `netstandard1.5`.
 
 ## 2.4.1
 - Updated to simpler GCP `LoggingServiceV2Client` instantiation for better compatibility with latest libraries.
@@ -21,13 +25,13 @@
 - Improved logging performance (`StringWriter` reuse) and cache log names (using a static dictionary).
 
 ## 2.3.0
-- Automatically format log names to match requirements (trim unsafe characters and use url-encoding).
+- Log names are automatically formatted to match requirements (trim unsafe characters and use url-encoding).
 
 ## 2.2.1
-- Update nuget references to latest versions.
+- Updated nuget references to latest versions.
 
 ## 2.2.0
-- Resource type will use explicitly defined option, or will be automatically discovered with a fallback to Global.
+- Resource type will use explicitly defined option, or will be automatically discovered with a fallback to `Global`.
 
 ## 2.1.1
 - `netstandard2.0` added to target frameworks to reduce dependency graph in newer platforms. See guidance at https://docs.microsoft.com/en-us/dotnet/standard/library-guidance/cross-platform-targeting
