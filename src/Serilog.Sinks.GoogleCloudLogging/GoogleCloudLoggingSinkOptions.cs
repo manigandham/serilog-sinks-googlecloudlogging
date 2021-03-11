@@ -64,6 +64,13 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public string ServiceVersion { get; set; }
 
         /// <summary>
+        /// LogEntry.Trace and LogEntry.SpanId are set, if the LogEvent contains TraceId and SpanId properties.
+        /// Required for Google Trace Log Correlation.
+        /// See https://cloud.google.com/trace/docs/trace-log-integration
+        /// </summary>
+        public bool UseLogCorrelation { get; set; }
+
+        /// <summary>
         /// Options for Google Cloud Logging
         /// </summary>
         /// <param name="projectId">ID (not name) of Google Cloud project where logs will be sent.</param>
