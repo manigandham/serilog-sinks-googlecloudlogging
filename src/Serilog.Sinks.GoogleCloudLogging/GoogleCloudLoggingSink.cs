@@ -106,22 +106,26 @@ namespace Serilog.Sinks.GoogleCloudLogging
                     entry.JsonPayload.Fields.Add("serviceContext", Value.ForStruct(contextStruct));
                 }
 
-                if (propStruct.Fields.TryGetValue("TraceId", out var traceId))
+                if (_sinkOptions.UseJsonOutput)
                 {
-                    if (traceId != null && traceId.KindCase == Value.KindOneofCase.StringValue && !string.IsNullOrEmpty(traceId.StringValue))
-                    {
-                        // Maybe we could cache this, but the traceId will change often
-                        entry.Trace = $"projects/{_projectId}/traces/{traceId.StringValue}";
-                        propStruct.Fields.Remove("TraceId");
-                    }
-                }
 
-                if (propStruct.Fields.TryGetValue("SpanId", out var spanId))
-                {
-                    if (spanId != null && traceId.KindCase == Value.KindOneofCase.StringValue && !string.IsNullOrEmpty(spanId.StringValue))
+                    if (propStruct.Fields.TryGetValue("TraceId", out var traceId))
                     {
-                        entry.SpanId = spanId.StringValue;
-                        propStruct.Fields.Remove("SpanId");
+                        if (traceId != null && traceId.KindCase == Value.KindOneofCase.StringValue && !string.IsNullOrEmpty(traceId.StringValue))
+                        {
+                            // Maybe we could cache this, but the traceId will change often
+                            entry.Trace = $"projects/{_projectId}/traces/{traceId.StringValue}";
+                            propStruct.Fields.Remove("TraceId");
+                        }
+                    }
+
+                    if (propStruct.Fields.TryGetValue("SpanId", out var spanId))
+                    {
+                        if (spanId != null && traceId.KindCase == Value.KindOneofCase.StringValue && !string.IsNullOrEmpty(spanId.StringValue))
+                        {
+                            entry.SpanId = spanId.StringValue;
+                            propStruct.Fields.Remove("SpanId");
+                        }
                     }
                 }
 
