@@ -70,7 +70,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 entries.Add(CreateLogEntry(e, writer));
 
             if (entries.Count > 0)
-                return _client.WriteLogEntriesAsync((LogName)null, _resource, _sinkOptions.Labels, entries, CancellationToken.None);
+                return _client.WriteLogEntriesAsync((LogName) null, _resource, _sinkOptions.Labels, entries, CancellationToken.None);
 
             return Task.CompletedTask;
         }
@@ -106,9 +106,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
                     entry.JsonPayload.Fields.Add("serviceContext", Value.ForStruct(contextStruct));
                 }
 
-                if (_sinkOptions.UseJsonOutput)
+                if (_sinkOptions.UseLogCorrelation)
                 {
-
                     if (propStruct.Fields.TryGetValue("TraceId", out var traceId))
                     {
                         if (traceId != null && traceId.KindCase == Value.KindOneofCase.StringValue && !string.IsNullOrEmpty(traceId.StringValue))
@@ -128,7 +127,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
                         }
                     }
                 }
-
             }
             else
             {

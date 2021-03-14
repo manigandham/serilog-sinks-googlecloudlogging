@@ -45,6 +45,13 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// Defaults to false. This must be set to True for logged exceptions to be forwarded to StackDriver Error Reporting.
         /// </summary>
         public bool UseJsonOutput { get; set; }
+        
+        /// <summary>
+        /// Integrate logs with Cloud Trace by setting LogEntry.Trace and LogEntry.SpanId if the LogEvent contains TraceId and SpanId properties.
+        /// Required for Google Cloud Trace Log Correlation.
+        /// See https://cloud.google.com/trace/docs/trace-log-integration
+        /// </summary>
+        public bool UseLogCorrelation { get; set; }
 
         /// <summary>
         /// JSON string of Google Cloud credentials file, otherwise will use Application Default credentials found on host by default.
@@ -64,13 +71,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public string ServiceVersion { get; set; }
 
         /// <summary>
-        /// LogEntry.Trace and LogEntry.SpanId are set, if the LogEvent contains TraceId and SpanId properties.
-        /// Required for Google Trace Log Correlation.
-        /// See https://cloud.google.com/trace/docs/trace-log-integration
-        /// </summary>
-        public bool UseLogCorrelation { get; set; }
-
-        /// <summary>
         /// Options for Google Cloud Logging
         /// </summary>
         /// <param name="projectId">ID (not name) of Google Cloud project where logs will be sent.</param>
@@ -80,6 +80,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <param name="resourceLabels">Additional custom labels for the resource type added to all log entries.</param>
         /// <param name="useSourceContextAsLogName"></param>
         /// <param name="useJsonOutput"></param>
+        /// <param name="useLogCorrelation"></param>
         /// <param name="googleCredentialJson">JSON string of Google Cloud credentials file, otherwise will use Application Default credentials found on host by default.</param>
         /// <param name="serviceName">Name of service, added as "serviceContext.service" metadata.</param>
         /// <param name="serviceVersion">Version of service, added as "serviceContext.version" metadata.</param>
@@ -91,6 +92,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             Dictionary<string, string> resourceLabels = null,
             bool useSourceContextAsLogName = true,
             bool useJsonOutput = false,
+            bool useLogCorrelation = true,
             string googleCredentialJson = null,
             string serviceName = null,
             string serviceVersion = null
@@ -110,6 +112,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
             UseSourceContextAsLogName = useSourceContextAsLogName;
             UseJsonOutput = useJsonOutput;
+            UseLogCorrelation = useLogCorrelation;
             GoogleCredentialJson = googleCredentialJson;
             ServiceName = serviceName;
             ServiceVersion = serviceVersion ?? "<Unknown>";
