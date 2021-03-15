@@ -1,8 +1,9 @@
 # Changelog
 
 ## 3.3.2
-- Added `UseLogCorrelation` configuration to allow log integration with [Google Cloud Trace](https://cloud.google.com/trace/docs/trace-log-integration).
+- Added `UseLogCorrelation` option to allow log integration with [Google Cloud Trace](https://cloud.google.com/trace/docs/trace-log-integration). Defaults to `true`.
 - Updated nuget references to latest versions.
+- Added `net5.0` framework target.
 
 ## 3.3.1
 - Updated nuget references to latest versions.
