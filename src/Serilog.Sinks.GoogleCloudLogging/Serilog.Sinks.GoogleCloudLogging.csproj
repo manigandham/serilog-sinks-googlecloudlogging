@@ -17,7 +17,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>3.3.0</Version>
-    <PackageVersion>3.3.2</PackageVersion>
+    <PackageVersion>3.3.3</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

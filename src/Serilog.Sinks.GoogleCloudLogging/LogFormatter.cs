@@ -168,10 +168,10 @@ namespace Serilog.Sinks.GoogleCloudLogging
             if (_useLogCorrelation)
             {
                 if (key.Equals("TraceId", StringComparison.OrdinalIgnoreCase))
-                    log.Trace = $"projects/{_projectId}/traces/{key}";
+                    log.Trace = $"projects/{_projectId}/traces/{value}";
 
                 if (key.Equals("SpanId", StringComparison.OrdinalIgnoreCase))
-                    log.SpanId = key;
+                    log.SpanId = value;
             }
         }
 

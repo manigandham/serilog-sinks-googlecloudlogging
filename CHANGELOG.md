@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.3.3
+- Fixed incorrect log correlation trace/span ids.
+
 ## 3.3.2
 - Added `UseLogCorrelation` option to allow log integration with [Google Cloud Trace](https://cloud.google.com/trace/docs/trace-log-integration). Defaults to `true`.
 - Updated nuget references to latest versions.
