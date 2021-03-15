@@ -23,7 +23,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly MonitoredResource _resource;
         private readonly bool _serviceNameAvailable;
         private readonly LogFormatter _logFormatter;
-        private readonly string _projectId;
 
         public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter messageTemplateTextFormatter)
         {
@@ -55,10 +54,10 @@ namespace Serilog.Sinks.GoogleCloudLogging
             _resource.Type = sinkOptions.ResourceType ?? _resource.Type;
 
             // use explicit project ID or fallback to project ID found in platform environment details above
-            _projectId = _sinkOptions.ProjectId ?? platform.ProjectId ?? _resource.Labels["project_id"];
+            var projectId = _sinkOptions.ProjectId ?? platform.ProjectId ?? _resource.Labels["project_id"];
 
-            _logName = LogFormatter.CreateLogName(_projectId, sinkOptions.LogName);
-            _logFormatter = new LogFormatter(_projectId, _sinkOptions.UseSourceContextAsLogName, messageTemplateTextFormatter);
+            _logName = LogFormatter.CreateLogName(projectId, sinkOptions.LogName);
+            _logFormatter = new LogFormatter(projectId, _sinkOptions.UseSourceContextAsLogName, _sinkOptions.UseLogCorrelation, messageTemplateTextFormatter);
             _serviceNameAvailable = !String.IsNullOrWhiteSpace(_sinkOptions.ServiceName);
         }
 
@@ -104,28 +103,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
                     contextStruct.Fields.Add("service", Value.ForString(_sinkOptions.ServiceName));
                     contextStruct.Fields.Add("version", Value.ForString(_sinkOptions.ServiceVersion));
                     entry.JsonPayload.Fields.Add("serviceContext", Value.ForStruct(contextStruct));
-                }
-
-                if (_sinkOptions.UseLogCorrelation)
-                {
-                    if (propStruct.Fields.TryGetValue("TraceId", out var traceId))
-                    {
-                        if (traceId != null && traceId.KindCase == Value.KindOneofCase.StringValue && !string.IsNullOrEmpty(traceId.StringValue))
-                        {
-                            // Maybe we could cache this, but the traceId will change often
-                            entry.Trace = $"projects/{_projectId}/traces/{traceId.StringValue}";
-                            propStruct.Fields.Remove("TraceId");
-                        }
-                    }
-
-                    if (propStruct.Fields.TryGetValue("SpanId", out var spanId))
-                    {
-                        if (spanId != null && traceId.KindCase == Value.KindOneofCase.StringValue && !string.IsNullOrEmpty(spanId.StringValue))
-                        {
-                            entry.SpanId = spanId.StringValue;
-                            propStruct.Fields.Remove("SpanId");
-                        }
-                    }
                 }
             }
             else

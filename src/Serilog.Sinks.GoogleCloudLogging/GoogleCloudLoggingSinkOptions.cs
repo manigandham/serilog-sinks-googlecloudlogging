@@ -45,7 +45,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// Defaults to false. This must be set to True for logged exceptions to be forwarded to StackDriver Error Reporting.
         /// </summary>
         public bool UseJsonOutput { get; set; }
-        
+
         /// <summary>
         /// Integrate logs with Cloud Trace by setting LogEntry.Trace and LogEntry.SpanId if the LogEvent contains TraceId and SpanId properties.
         /// Required for Google Cloud Trace Log Correlation.
@@ -95,8 +95,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             bool useLogCorrelation = true,
             string googleCredentialJson = null,
             string serviceName = null,
-            string serviceVersion = null
-        )
+            string serviceVersion = null)
         {
             ProjectId = projectId;
             ResourceType = resourceType;

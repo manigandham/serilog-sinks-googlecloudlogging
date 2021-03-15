@@ -65,6 +65,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             Dictionary<string, string> resourceLabels = null,
             bool useSourceContextAsLogName = true,
             bool useJsonOutput = false,
+            bool useLogCorrelation = true,
             string googleCredentialJson = null,
             string serviceName = null,
             string serviceVersion = null,
@@ -73,8 +74,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             int? queueLimit = null,
             string outputTemplate = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            LoggingLevelSwitch levelSwitch = null
-        )
+            LoggingLevelSwitch levelSwitch = null)
         {
             var options = new GoogleCloudLoggingSinkOptions(
                 projectId,
@@ -84,6 +84,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 resourceLabels,
                 useSourceContextAsLogName,
                 useJsonOutput,
+                useLogCorrelation,
                 googleCredentialJson,
                 serviceName,
                 serviceVersion

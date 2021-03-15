@@ -6,6 +6,7 @@ using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using Google.Cloud.Logging.V2;
 using Google.Protobuf.WellKnownTypes;
+using Grpc.Core;
 using Serilog.Events;
 using Serilog.Formatting.Display;
 
@@ -15,15 +16,21 @@ namespace Serilog.Sinks.GoogleCloudLogging
     {
         private readonly string _projectId;
         private readonly bool _useSourceContextAsLogName;
+        private readonly bool _useLogCorrelation;
         private readonly MessageTemplateTextFormatter _messageTemplateTextFormatter;
 
         private static readonly Dictionary<string, string> LogNameCache = new Dictionary<string, string>(StringComparer.Ordinal);
         private static readonly Regex LogNameUnsafeChars = new Regex("[^0-9A-Z._/-]+", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
 
-        public LogFormatter(string projectId, bool useSourceContextAsLogName, MessageTemplateTextFormatter messageTemplateTextFormatter)
+        public LogFormatter(
+            string projectId,
+            bool useSourceContextAsLogName,
+            bool useLogCorrelation,
+            MessageTemplateTextFormatter messageTemplateTextFormatter)
         {
             _projectId = projectId;
             _useSourceContextAsLogName = useSourceContextAsLogName;
+            _useLogCorrelation = useLogCorrelation;
             _messageTemplateTextFormatter = messageTemplateTextFormatter;
         }
 
@@ -81,14 +88,14 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
                 case ScalarValue scalarValue when scalarValue.Value is string stringValue:
                     jsonStruct.Fields.Add(propKey, Value.ForString(stringValue));
-                    CheckIfSourceContext(log, propKey, stringValue);
+                    CheckForSpecialProperties(log, propKey, stringValue);
                     break;
 
                 case ScalarValue scalarValue:
                     // handle all other scalar values as strings
                     var strValue = scalarValue.Value.ToString();
                     jsonStruct.Fields.Add(propKey, Value.ForString(strValue));
-                    CheckIfSourceContext(log, propKey, strValue);
+                    CheckForSpecialProperties(log, propKey, strValue);
                     break;
 
                 case SequenceValue sequenceValue:
@@ -132,7 +139,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 case ScalarValue scalarValue:
                     var stringValue = scalarValue.Value.ToString();
                     log.Labels.Add(propertyKey, stringValue);
-                    CheckIfSourceContext(log, propertyKey, stringValue);
+                    CheckForSpecialProperties(log, propertyKey, stringValue);
                     break;
 
                 case SequenceValue sequenceValue:
@@ -153,10 +160,19 @@ namespace Serilog.Sinks.GoogleCloudLogging
             }
         }
 
-        private void CheckIfSourceContext(LogEntry log, string propertyKey, string stringValue)
+        private void CheckForSpecialProperties(LogEntry log, string key, string value)
         {
-            if (_useSourceContextAsLogName && propertyKey.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
-                log.LogName = CreateLogName(_projectId, stringValue);
+            if (_useSourceContextAsLogName && key.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
+                log.LogName = CreateLogName(_projectId, value);
+
+            if (_useLogCorrelation)
+            {
+                if (key.Equals("TraceId", StringComparison.OrdinalIgnoreCase))
+                    log.Trace = $"projects/{_projectId}/traces/{key}";
+
+                if (key.Equals("SpanId", StringComparison.OrdinalIgnoreCase))
+                    log.SpanId = key;
+            }
         }
 
         public static string CreateLogName(string projectId, string name)
