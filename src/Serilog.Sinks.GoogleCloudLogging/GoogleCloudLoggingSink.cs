@@ -24,20 +24,14 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly bool _serviceNameAvailable;
         private readonly LogFormatter _logFormatter;
 
-        public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter messageTemplateTextFormatter)
+        public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter? messageTemplateTextFormatter)
         {
             _sinkOptions = sinkOptions;
 
             // logging client for google cloud apis
-            // requires extra setup if credentials are passed as raw json text
-            if (sinkOptions.GoogleCredentialJson == null)
-            {
-                _client = LoggingServiceV2Client.Create();
-            }
-            else
-            {
-                _client = new LoggingServiceV2ClientBuilder { JsonCredentials = sinkOptions.GoogleCredentialJson }.Build();
-            }
+            _client = sinkOptions.GoogleCredentialJson != null
+                ? new LoggingServiceV2ClientBuilder { JsonCredentials = sinkOptions.GoogleCredentialJson }.Build()
+                : LoggingServiceV2Client.Create();
 
             // retrieve current environment details (gke/gce/appengine) from google libraries automatically
             var platform = Platform.Instance();
@@ -46,12 +40,12 @@ namespace Serilog.Sinks.GoogleCloudLogging
             _resource = platform.Type == PlatformType.Unknown
                 ? MonitoredResourceBuilder.GlobalResource
                 : MonitoredResourceBuilder.FromPlatform(platform);
+            
+            // use explicit ResourceType if set
+            _resource.Type = sinkOptions.ResourceType ?? _resource.Type;
 
             foreach (var kvp in _sinkOptions.ResourceLabels)
                 _resource.Labels[kvp.Key] = kvp.Value;
-
-            // use explicit ResourceType if set
-            _resource.Type = sinkOptions.ResourceType ?? _resource.Type;
 
             // use explicit project ID or fallback to project ID found in platform environment details above
             var projectId = _sinkOptions.ProjectId ?? platform.ProjectId ?? _resource.Labels["project_id"];
@@ -65,35 +59,34 @@ namespace Serilog.Sinks.GoogleCloudLogging
         {
             using var writer = new StringWriter();
             var entries = new List<LogEntry>();
-            foreach (var e in events)
-                entries.Add(CreateLogEntry(e, writer));
+            foreach (var evnt in events)
+                entries.Add(CreateLogEntry(evnt, writer));
 
             if (entries.Count > 0)
-                return _client.WriteLogEntriesAsync((LogName) null, _resource, _sinkOptions.Labels, entries, CancellationToken.None);
+                return _client.WriteLogEntriesAsync(_logName, _resource, _sinkOptions.Labels, entries, CancellationToken.None);
 
             return Task.CompletedTask;
         }
 
-        private LogEntry CreateLogEntry(LogEvent e, StringWriter writer)
+        private LogEntry CreateLogEntry(LogEvent evnt, StringWriter writer)
         {
-            var entry = new LogEntry
+            var log = new LogEntry
             {
-                LogName = _logName,
-                Severity = TranslateSeverity(e.Level),
-                Timestamp = Timestamp.FromDateTimeOffset(e.Timestamp)
+                Severity = TranslateSeverity(evnt.Level),
+                Timestamp = Timestamp.FromDateTimeOffset(evnt.Timestamp)
             };
 
             if (_sinkOptions.UseJsonOutput)
             {
                 // json output builds up a protobuf object to be serialized in cloud logging
-                entry.JsonPayload = new Struct();
-                entry.JsonPayload.Fields.Add("message", Value.ForString(_logFormatter.RenderEventMessage(e, writer)));
+                var jsonPayload = new Struct();
+                jsonPayload.Fields.Add("message", Value.ForString(_logFormatter.RenderEventMessage(evnt, writer)));
 
                 var propStruct = new Struct();
-                foreach (var property in e.Properties)
-                    _logFormatter.WritePropertyAsJson(entry, propStruct, property.Key, property.Value);
+                foreach (var property in evnt.Properties)
+                    _logFormatter.WritePropertyAsJson(log, propStruct, property.Key, property.Value);
 
-                entry.JsonPayload.Fields.Add("properties", Value.ForStruct(propStruct));
+                jsonPayload.Fields.Add("properties", Value.ForStruct(propStruct));
 
                 // service name and version are added as extra context data if available
                 // these properties are required for any logged exceptions to automatically be picked up by cloud error reporting
@@ -102,19 +95,21 @@ namespace Serilog.Sinks.GoogleCloudLogging
                     var contextStruct = new Struct();
                     contextStruct.Fields.Add("service", Value.ForString(_sinkOptions.ServiceName));
                     contextStruct.Fields.Add("version", Value.ForString(_sinkOptions.ServiceVersion));
-                    entry.JsonPayload.Fields.Add("serviceContext", Value.ForStruct(contextStruct));
+                    jsonPayload.Fields.Add("serviceContext", Value.ForStruct(contextStruct));
                 }
+
+                log.JsonPayload = jsonPayload;
             }
             else
             {
                 // text output is simple stringification
-                entry.TextPayload = _logFormatter.RenderEventMessage(e, writer);
+                log.TextPayload = _logFormatter.RenderEventMessage(evnt, writer);
 
-                foreach (var property in e.Properties)
-                    _logFormatter.WritePropertyAsLabel(entry, property.Key, property.Value);
+                foreach (var property in evnt.Properties)
+                    _logFormatter.WritePropertyAsLabel(log, property.Key, property.Value);
             }
 
-            return entry;
+            return log;
         }
 
         private static LogSeverity TranslateSeverity(LogEventLevel level) => level switch

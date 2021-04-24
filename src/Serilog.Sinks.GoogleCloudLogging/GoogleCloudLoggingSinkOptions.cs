@@ -8,13 +8,13 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// ID (not name) of Google Cloud Platform project where logs will be sent.
         /// Optional if running in GCP. Required if running elsewhere or to override the destination.
         /// </summary>
-        public string ProjectId { get; set; }
+        public string? ProjectId { get; set; }
 
         /// <summary>
         /// Resource type for logs, one of (https://cloud.google.com/logging/docs/api/v2/resource-list).
         /// Optional, will be automatically identified if running in GCP or will be set to "global".
         /// </summary>
-        public string ResourceType { get; set; }
+        public string? ResourceType { get; set; }
 
         /// <summary>
         /// Name of individual log.
@@ -25,12 +25,12 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <summary>
         /// Optional labels added to all log entries.
         /// </summary>
-        public Dictionary<string, string> Labels { get; } = new Dictionary<string, string>();
+        public Dictionary<string, string> Labels { get; } = new();
 
         /// <summary>
         /// Optional labels for the resource type added to all log entries.
         /// </summary>
-        public Dictionary<string, string> ResourceLabels { get; } = new Dictionary<string, string>();
+        public Dictionary<string, string> ResourceLabels { get; } = new();
 
         /// <summary>
         /// If a log entry includes a `SourceContext` property (usually created from a log created with a context) then it will be used as the name of the log.
@@ -54,7 +54,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <summary>
         /// JSON string of Google Cloud credentials file, otherwise will use Application Default credentials found on host by default.
         /// </summary>
-        public string GoogleCredentialJson { get; set; }
+        public string? GoogleCredentialJson { get; set; }
 
         /// <summary>
         /// Attach service name to log entries (added as `serviceContext.service` metadata in `jsonPayload`).
@@ -63,7 +63,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <remarks>
         /// <c>System.Reflection.Assembly.GetExecutingAssembly().GetName().Name</c> is a good value to use.
         /// </remarks>
-        public string ServiceName { get; set; }
+        public string? ServiceName { get; set; }
 
         /// <summary>
         /// Attach service version to log entries (added as `serviceContext.version` metadata in `jsonPayload`).
@@ -115,17 +115,17 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// Required for logged exceptions to be forwarded to StackDriver Error Reporting. Must enable <see cref="UseJsonOutput"/>.
         /// </param>
         public GoogleCloudLoggingSinkOptions(
-            string projectId = null,
-            string resourceType = null,
-            string logName = null,
-            Dictionary<string, string> labels = null,
-            Dictionary<string, string> resourceLabels = null,
+            string? projectId = null,
+            string? resourceType = null,
+            string? logName = null,
+            Dictionary<string, string>? labels = null,
+            Dictionary<string, string>? resourceLabels = null,
             bool useSourceContextAsLogName = true,
             bool useJsonOutput = false,
             bool useLogCorrelation = true,
-            string googleCredentialJson = null,
-            string serviceName = null,
-            string serviceVersion = null)
+            string? googleCredentialJson = null,
+            string? serviceName = null,
+            string? serviceVersion = null)
         {
             ProjectId = projectId;
             ResourceType = resourceType;
