@@ -28,16 +28,12 @@ namespace Serilog.Sinks.GoogleCloudLogging
             int? batchSizeLimit = null,
             TimeSpan? period = null,
             int? queueLimit = null,
-            string outputTemplate = null,
+            string? outputTemplate = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            LoggingLevelSwitch levelSwitch = null)
+            LoggingLevelSwitch? levelSwitch = null)
         {
-            var messageTemplateTextFormatter = String.IsNullOrWhiteSpace(outputTemplate) ? null : new MessageTemplateTextFormatter(outputTemplate, null);
-
-            var sink = new GoogleCloudLoggingSink(
-                sinkOptions,
-                messageTemplateTextFormatter
-            );
+            // create a template formatter if output template is provided
+            var messageTemplateTextFormatter = String.IsNullOrWhiteSpace(outputTemplate) ? null : new MessageTemplateTextFormatter(outputTemplate);
 
             var batchingOptions = new PeriodicBatchingSinkOptions
             {
@@ -46,6 +42,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 QueueLimit = queueLimit
             };
 
+            var sink = new GoogleCloudLoggingSink(sinkOptions, messageTemplateTextFormatter);
             var batchingSink = new PeriodicBatchingSink(sink, batchingOptions);
 
             return loggerConfiguration.Sink(batchingSink, restrictedToMinimumLevel, levelSwitch);
@@ -58,23 +55,23 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <returns>Configuration object allowing method chaining.</returns>
         public static LoggerConfiguration GoogleCloudLogging(
             this LoggerSinkConfiguration loggerConfiguration,
-            string projectId = null,
-            string resourceType = null,
-            string logName = null,
-            Dictionary<string, string> labels = null,
-            Dictionary<string, string> resourceLabels = null,
+            string? projectId = null,
+            string? resourceType = null,
+            string? logName = null,
+            Dictionary<string, string>? labels = null,
+            Dictionary<string, string>? resourceLabels = null,
             bool useSourceContextAsLogName = true,
             bool useJsonOutput = false,
             bool useLogCorrelation = true,
-            string googleCredentialJson = null,
-            string serviceName = null,
-            string serviceVersion = null,
+            string? googleCredentialJson = null,
+            string? serviceName = null,
+            string? serviceVersion = null,
             int? batchSizeLimit = null,
             TimeSpan? period = null,
             int? queueLimit = null,
-            string outputTemplate = null,
+            string? outputTemplate = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            LoggingLevelSwitch levelSwitch = null)
+            LoggingLevelSwitch? levelSwitch = null)
         {
             var options = new GoogleCloudLoggingSinkOptions(
                 projectId,

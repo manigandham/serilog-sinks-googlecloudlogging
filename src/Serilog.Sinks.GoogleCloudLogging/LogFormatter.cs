@@ -6,7 +6,6 @@ using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using Google.Cloud.Logging.V2;
 using Google.Protobuf.WellKnownTypes;
-using Grpc.Core;
 using Serilog.Events;
 using Serilog.Formatting.Display;
 
@@ -17,16 +16,16 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly string _projectId;
         private readonly bool _useSourceContextAsLogName;
         private readonly bool _useLogCorrelation;
-        private readonly MessageTemplateTextFormatter _messageTemplateTextFormatter;
+        private readonly MessageTemplateTextFormatter? _messageTemplateTextFormatter;
 
-        private static readonly Dictionary<string, string> LogNameCache = new Dictionary<string, string>(StringComparer.Ordinal);
-        private static readonly Regex LogNameUnsafeChars = new Regex("[^0-9A-Z._/-]+", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
+        private static readonly Dictionary<string, string> LogNameCache = new(StringComparer.Ordinal);
+        private static readonly Regex LogNameUnsafeChars = new("[^0-9A-Z._/-]+", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
 
         public LogFormatter(
             string projectId,
             bool useSourceContextAsLogName,
             bool useLogCorrelation,
-            MessageTemplateTextFormatter messageTemplateTextFormatter)
+            MessageTemplateTextFormatter? messageTemplateTextFormatter)
         {
             _projectId = projectId;
             _useSourceContextAsLogName = useSourceContextAsLogName;
@@ -76,11 +75,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                     jsonStruct.Fields.Add(propKey, Value.ForBool(boolValue));
                     break;
 
-                case ScalarValue scalarValue
-                    when scalarValue.Value is short || scalarValue.Value is ushort || scalarValue.Value is int
-                         || scalarValue.Value is uint || scalarValue.Value is long || scalarValue.Value is ulong
-                         || scalarValue.Value is float || scalarValue.Value is double || scalarValue.Value is decimal:
-
+                case ScalarValue scalarValue when scalarValue.Value is short or ushort or int or uint or long or ulong or float or double or decimal:
                     // all numbers are converted to double and may lose precision
                     // numbers should be sent as strings if they do not fit in a double
                     jsonStruct.Fields.Add(propKey, Value.ForNumber(Convert.ToDouble(scalarValue.Value)));
@@ -93,7 +88,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
                 case ScalarValue scalarValue:
                     // handle all other scalar values as strings
-                    var strValue = scalarValue.Value.ToString();
+                    var strValue = scalarValue.Value.ToString() ?? String.Empty;
                     jsonStruct.Fields.Add(propKey, Value.ForString(strValue));
                     CheckForSpecialProperties(log, propKey, strValue);
                     break;
@@ -117,7 +112,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 case DictionaryValue dictionaryValue:
                     var dictionaryChild = new Struct();
                     foreach (var childProperty in dictionaryValue.Elements)
-                        WritePropertyAsJson(log, dictionaryChild, childProperty.Key.Value?.ToString(), childProperty.Value);
+                        WritePropertyAsJson(log, dictionaryChild, childProperty.Key.Value?.ToString() ?? String.Empty, childProperty.Value);
 
                     jsonStruct.Fields.Add(propKey, Value.ForStruct(dictionaryChild));
                     break;
@@ -128,33 +123,29 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// Writes event properties as labels for a GCP log entry.
         /// GCP log labels are a flat key/value namespace so all child event properties will be prefixed with parent property names "parentkey.childkey" similar to json path.
         /// </summary>
-        public void WritePropertyAsLabel(LogEntry log, string propertyKey, LogEventPropertyValue propertyValue)
+        public void WritePropertyAsLabel(LogEntry log, string propKey, LogEventPropertyValue propValue)
         {
-            switch (propertyValue)
+            switch (propValue)
             {
-                case ScalarValue scalarValue when scalarValue.Value is null:
-                    log.Labels.Add(propertyKey, String.Empty);
-                    break;
-
                 case ScalarValue scalarValue:
-                    var stringValue = scalarValue.Value.ToString();
-                    log.Labels.Add(propertyKey, stringValue);
-                    CheckForSpecialProperties(log, propertyKey, stringValue);
+                    var stringValue = scalarValue.Value?.ToString() ?? String.Empty;
+                    log.Labels.Add(propKey, stringValue);
+                    CheckForSpecialProperties(log, propKey, stringValue);
                     break;
 
                 case SequenceValue sequenceValue:
-                    log.Labels.Add(propertyKey, String.Join(",", sequenceValue.Elements));
+                    log.Labels.Add(propKey, String.Join(",", sequenceValue.Elements));
                     break;
 
                 case StructureValue structureValue when structureValue.Properties.Count > 0:
                     foreach (var childProperty in structureValue.Properties)
-                        WritePropertyAsLabel(log, propertyKey + "." + childProperty.Name, childProperty.Value);
+                        WritePropertyAsLabel(log, propKey + "." + childProperty.Name, childProperty.Value);
 
                     break;
 
                 case DictionaryValue dictionaryValue when dictionaryValue.Elements.Count > 0:
                     foreach (var childProperty in dictionaryValue.Elements)
-                        WritePropertyAsLabel(log, propertyKey + "." + childProperty.Key.ToString().Replace("\"", ""), childProperty.Value);
+                        WritePropertyAsLabel(log, propKey + "." + childProperty.Key.ToString().Replace("\"", ""), childProperty.Value);
 
                     break;
             }
