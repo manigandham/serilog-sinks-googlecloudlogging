@@ -11,11 +11,11 @@ namespace Serilog.Sinks.GoogleCloudLogging
     public static class GoogleCloudLoggingSinkExtensions
     {
         /// <summary>
-        /// Writes log events to Google Cloud Platform Stackdriver Logging.
+        /// Writes log events to Google Cloud Logging.
         /// </summary>
         /// <param name="loggerConfiguration">Logger sink configuration.</param>
         /// <param name="sinkOptions">Google Cloud Logging sink options.</param>
-        /// <param name="batchSizeLimit">The maximum number of events to include in a single batch. The defailt is 100.</param>
+        /// <param name="batchSizeLimit">The maximum number of events to include in a single batch. The default is 100.</param>
         /// <param name="period">The time to wait between checking for event batches. The default is five seconds.</param>
         /// <param name="queueLimit">Maximum number of events in the queue. If not specified, uses an unbounded queue.</param>
         /// <param name="outputTemplate">A message template describing the format used to write to the sink.</param>

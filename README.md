@@ -83,7 +83,7 @@ WARNING: JSON output only accepts numeric values as `double` so all numbers will
 
 This table shows the mapping from Serilog [`LogLevel`](https://github.com/serilog/serilog/wiki/Configuration-Basics#minimum-level) to Stackdriver [`LogSeverity`](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity)
 
-Serilog | Stackdriver
+Serilog | Cloud Logging
 ------------- | -----------------
 Verbose | Debug
 Debug | Debug
@@ -95,7 +95,3 @@ Fatal | Critical
 ## Viewing Logs
 
 Logs will appear in the Google Cloud Console Log Viewer: https://console.cloud.google.com/logs/viewer
-
-When using default options, logs will appear under these filter settings:
-
-![](https://i.imgur.com/3lk1LLM.png)

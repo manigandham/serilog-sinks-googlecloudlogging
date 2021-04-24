@@ -85,7 +85,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
             if (_sinkOptions.UseJsonOutput)
             {
-                // json output builds up a protobuf object to be serialized in stackdriver logs
+                // json output builds up a protobuf object to be serialized in cloud logging
                 entry.JsonPayload = new Struct();
                 entry.JsonPayload.Fields.Add("message", Value.ForString(_logFormatter.RenderEventMessage(e, writer)));
 
@@ -96,7 +96,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 entry.JsonPayload.Fields.Add("properties", Value.ForStruct(propStruct));
 
                 // service name and version are added as extra context data if available
-                // these properties are required for any logged exceptions to automatically be picked up by stackdriver error reporting
+                // these properties are required for any logged exceptions to automatically be picked up by cloud error reporting
                 if (_serviceNameAvailable)
                 {
                     var contextStruct = new Struct();
