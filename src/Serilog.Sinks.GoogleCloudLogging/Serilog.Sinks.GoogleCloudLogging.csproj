@@ -16,9 +16,8 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>3.3.0</Version>
-    <PackageVersion>3.3.3</PackageVersion>
     <Nullable>enable</Nullable>
+    <PackageVersion>3.4.0</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,7 +1,14 @@
 # Changelog
 
+Readme: https://github.com/manigandham/serilog-sinks-googlecloudlogging/blob/master/README.md
+
+## 3.4.0
+- Enabled nullable reference types for project and updated type definitions for extra safety.
+- Improved XML comments and documentation.
+- Updated nuget references to latest versions.
+
 ## 3.3.3
-- Fixed incorrect log correlation trace/span ids.
+- Fixed bug with incorrect log correlation trace/span ids.
 
 ## 3.3.2
 - Added `UseLogCorrelation` option to allow log integration with [Google Cloud Trace](https://cloud.google.com/trace/docs/trace-log-integration). Defaults to `true`.
@@ -16,7 +23,7 @@
 - Added support for level switch to change minimum logging level at runtime.
 
 ## 3.2.0
-- Bug fix with `IBatchedLogEventSink` implementation.
+- Fixed bug with `IBatchedLogEventSink` implementation.
 
 ## 3.1.0
 - Updated nuget references and used new `IBatchedLogEventSink` interface for `Serilog.Sinks.PeriodicBatching`.
