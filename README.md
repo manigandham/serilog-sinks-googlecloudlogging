@@ -69,7 +69,7 @@ Name | Default | Description
 `UseJsonOutput` | False | Structured logs can be sent as text with labels or as a JSON object, see details below.
 `GoogleCredentialJson` | | GCP client libraries use [Application Default Credentials](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application). If these are not available or you need to use other credentials, set the JSON text of a credential file directly.
 `ServiceName` | | Name of the service added as metadata to log entries. Required to forward logged exceptions to StackDriver Error Reporting. Must also set `UseJsonOutput` to true.
-`ServiceVersion` | | Version of the service added as metadata to log entries. Defaults to `<unknown>`.
+`ServiceVersion` | | Version of the service added as metadata to log entries.
 
 #### Output Type
 

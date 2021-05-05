@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using FluentAssertions;
 using Xunit;
 
@@ -22,7 +21,7 @@ namespace Serilog.Sinks.GoogleCloudLogging.Test
                     ResourceLabels = { },
                     ResourceType = null,
                     ServiceName = null,
-                    ServiceVersion = "<Unknown>",
+                    ServiceVersion = null,
                     UseJsonOutput = false,
                     UseSourceContextAsLogName = true,
                 });

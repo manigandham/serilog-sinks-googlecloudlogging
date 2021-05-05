@@ -4,7 +4,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Api;
-using Google.Api.Gax;
 using Google.Api.Gax.Grpc;
 using Google.Cloud.Logging.Type;
 using Google.Cloud.Logging.V2;
@@ -19,10 +18,10 @@ namespace Serilog.Sinks.GoogleCloudLogging
     {
         private readonly GoogleCloudLoggingSinkOptions _sinkOptions;
         private readonly LoggingServiceV2Client _client;
-        private readonly string _logName;
         private readonly MonitoredResource _resource;
-        private readonly bool _serviceNameAvailable;
+        private readonly string _logName;
         private readonly LogFormatter _logFormatter;
+        private readonly Struct? _serviceContext;
 
         public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter? messageTemplateTextFormatter)
         {
@@ -40,7 +39,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             foreach (var kvp in _sinkOptions.ResourceLabels)
                 _resource.Labels[kvp.Key] = kvp.Value;
 
-            var projectId = _sinkOptions.ProjectId ?? _resource.Labels.GetValueOrDefault("project_id");
+            var projectId = _sinkOptions.ProjectId ?? (_resource.Labels.TryGetValue("project_id", out string id) ? id : null);
             if (String.IsNullOrWhiteSpace(projectId))
                 throw new ArgumentNullException(nameof(projectId), "Project Id is not provided and could not be automatically discovered.");
 
@@ -49,7 +48,16 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
             _logName = LogFormatter.CreateLogName(projectId, _sinkOptions.LogName);
             _logFormatter = new LogFormatter(projectId, _sinkOptions.UseSourceContextAsLogName, _sinkOptions.UseLogCorrelation, messageTemplateTextFormatter);
-            _serviceNameAvailable = !String.IsNullOrWhiteSpace(_sinkOptions.ServiceName);
+
+            // cache struct for service name and version contextual properties if available
+            // these properties are required for any logged exceptions to automatically be picked up by cloud error reporting
+            if (!String.IsNullOrWhiteSpace(_sinkOptions.ServiceName))
+            {
+                _serviceContext = new Struct();
+                _serviceContext.Fields.Add("service", Value.ForString(_sinkOptions.ServiceName));
+                if (!String.IsNullOrWhiteSpace(_sinkOptions.ServiceVersion))
+                    _serviceContext.Fields.Add("version", Value.ForString(_sinkOptions.ServiceVersion));
+            }
         }
 
         public Task EmitBatchAsync(IEnumerable<LogEvent> events)
@@ -85,15 +93,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
                 jsonPayload.Fields.Add("properties", Value.ForStruct(propStruct));
 
-                // service name and version are added as extra context data if available
-                // these properties are required for any logged exceptions to automatically be picked up by cloud error reporting
-                if (_serviceNameAvailable)
-                {
-                    var contextStruct = new Struct();
-                    contextStruct.Fields.Add("service", Value.ForString(_sinkOptions.ServiceName));
-                    contextStruct.Fields.Add("version", Value.ForString(_sinkOptions.ServiceVersion));
-                    jsonPayload.Fields.Add("serviceContext", Value.ForStruct(contextStruct));
-                }
+                if (_serviceContext != null)
+                    jsonPayload.Fields.Add("serviceContext", Value.ForStruct(_serviceContext));
 
                 log.JsonPayload = jsonPayload;
             }

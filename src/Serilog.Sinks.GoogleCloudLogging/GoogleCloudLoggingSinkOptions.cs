@@ -72,7 +72,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <remarks>
         /// <c>System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString()</c> is a good value to use.
         /// </remarks>
-        public string ServiceVersion { get; set; }
+        public string? ServiceVersion { get; set; }
 
         /// <summary>
         /// Options for Google Cloud Logging
@@ -144,7 +144,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             UseLogCorrelation = useLogCorrelation;
             GoogleCredentialJson = googleCredentialJson;
             ServiceName = serviceName;
-            ServiceVersion = serviceVersion ?? "<Unknown>";
+            ServiceVersion = serviceVersion;
         }
     }
 }
