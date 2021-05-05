@@ -29,28 +29,25 @@ namespace Serilog.Sinks.GoogleCloudLogging
             _sinkOptions = sinkOptions;
 
             // logging client for google cloud apis
-            _client = sinkOptions.GoogleCredentialJson != null
-                ? new LoggingServiceV2ClientBuilder { JsonCredentials = sinkOptions.GoogleCredentialJson }.Build()
+            _client = _sinkOptions.GoogleCredentialJson != null
+                ? new LoggingServiceV2ClientBuilder { JsonCredentials = _sinkOptions.GoogleCredentialJson }.Build()
                 : LoggingServiceV2Client.Create();
 
-            // retrieve current environment details (gke/gce/appengine) from google libraries automatically
-            var platform = Platform.Instance();
-
-            // resource can be extracted from environment details or fallback to "Global" resource
-            _resource = platform.Type == PlatformType.Unknown
-                ? MonitoredResourceBuilder.GlobalResource
-                : MonitoredResourceBuilder.FromPlatform(platform);
-            
-            // use explicit ResourceType if set
-            _resource.Type = sinkOptions.ResourceType ?? _resource.Type;
-
+            // retrieve current environment details automatically for GCE, GKE, GAE, or Cloud Run
+            // set any user-provided resource type and labels which will override existing values from environment
+            _resource = MonitoredResourceBuilder.FromPlatform();
+            _resource.Type = _sinkOptions.ResourceType ?? _resource.Type;
             foreach (var kvp in _sinkOptions.ResourceLabels)
                 _resource.Labels[kvp.Key] = kvp.Value;
 
-            // use explicit project ID or fallback to project ID found in platform environment details above
-            var projectId = _sinkOptions.ProjectId ?? platform.ProjectId ?? _resource.Labels["project_id"];
+            var projectId = _sinkOptions.ProjectId ?? _resource.Labels.GetValueOrDefault("project_id");
+            if (String.IsNullOrWhiteSpace(projectId))
+                throw new ArgumentNullException(nameof(projectId), "Project Id is not provided and could not be automatically discovered.");
 
-            _logName = LogFormatter.CreateLogName(projectId, sinkOptions.LogName);
+            if (String.IsNullOrWhiteSpace(_sinkOptions.LogName))
+                throw new ArgumentNullException(nameof(_sinkOptions.LogName), "Log Name is null. Either unset to use default value or check assignment.");
+
+            _logName = LogFormatter.CreateLogName(projectId, _sinkOptions.LogName);
             _logFormatter = new LogFormatter(projectId, _sinkOptions.UseSourceContextAsLogName, _sinkOptions.UseLogCorrelation, messageTemplateTextFormatter);
             _serviceNameAvailable = !String.IsNullOrWhiteSpace(_sinkOptions.ServiceName);
         }

@@ -20,7 +20,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// Name of individual log.
         /// Optional, will use `SourceContext` from Serilog context if available (see other setting) or will be set to "Default".
         /// </summary>
-        public string LogName { get; set; }
+        public string LogName { get; set; } = "Default";
 
         /// <summary>
         /// Optional labels added to all log entries.
@@ -129,7 +129,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         {
             ProjectId = projectId;
             ResourceType = resourceType;
-            LogName = logName ?? "Default";
+            LogName = logName ?? LogName;
 
             if (labels != null)
                 foreach (var kvp in labels)

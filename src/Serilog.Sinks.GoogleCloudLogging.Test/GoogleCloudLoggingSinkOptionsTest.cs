@@ -58,5 +58,16 @@ namespace Serilog.Sinks.GoogleCloudLogging.Test
                     UseSourceContextAsLogName = false,
                 });
         }
+
+        [Fact]
+        public void CheckNullLogName()
+        {
+            var options = new GoogleCloudLoggingSinkOptions("projectId")
+            {
+                LogName = null!
+            };
+
+            Assert.Throws<ArgumentNullException>(() => new GoogleCloudLoggingSink(options, null));
+        }
     }
 }
