@@ -1,23 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
-    <LangVersion>default</LangVersion>
+    <PackageVersion>3.4.0</PackageVersion>
     <Description>Serilog sink that writes events to Google Cloud Platform (Stackdriver) Logging.</Description>
     <Authors>Mani Gandham</Authors>
-    <PackageLicense>MIT</PackageLicense>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>serilog-sink-nuget.png</PackageIcon>
+    <PackageIconUrl>https://raw.githubusercontent.com/manigandham/serilog-sinks-googlecloudlogging/master/src/Serilog.Sinks.GoogleCloudLogging/serilog-sink-nuget.png</PackageIconUrl>
     <PackageTags>serilog; sink; google cloud; stackdriver; logging;</PackageTags>
+    <PackageReleaseNotes>https://github.com/manigandham/serilog-sinks-googlecloudlogging/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/manigandham/serilog-sinks-googlecloudlogging</PackageProjectUrl>
     <RepositoryUrl>https://github.com/manigandham/serilog-sinks-googlecloudlogging</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
+    <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
-    <PackageVersion>3.4.0</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
