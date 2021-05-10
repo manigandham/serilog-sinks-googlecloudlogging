@@ -13,23 +13,13 @@ namespace Serilog.Sinks.GoogleCloudLogging
 {
     internal class LogFormatter
     {
-        private readonly string _projectId;
-        private readonly bool _useSourceContextAsLogName;
-        private readonly bool _useLogCorrelation;
         private readonly MessageTemplateTextFormatter? _messageTemplateTextFormatter;
 
         private static readonly Dictionary<string, string> LogNameCache = new(StringComparer.Ordinal);
         private static readonly Regex LogNameUnsafeChars = new("[^0-9A-Z._/-]+", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
 
-        public LogFormatter(
-            string projectId,
-            bool useSourceContextAsLogName,
-            bool useLogCorrelation,
-            MessageTemplateTextFormatter? messageTemplateTextFormatter)
+        public LogFormatter(MessageTemplateTextFormatter? messageTemplateTextFormatter)
         {
-            _projectId = projectId;
-            _useSourceContextAsLogName = useSourceContextAsLogName;
-            _useLogCorrelation = useLogCorrelation;
             _messageTemplateTextFormatter = messageTemplateTextFormatter;
         }
 
@@ -83,14 +73,11 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
                 case ScalarValue scalarValue when scalarValue.Value is string stringValue:
                     jsonStruct.Fields.Add(propKey, Value.ForString(stringValue));
-                    CheckForSpecialProperties(log, propKey, stringValue);
                     break;
 
                 case ScalarValue scalarValue:
                     // handle all other scalar values as strings
-                    var strValue = scalarValue.Value.ToString() ?? String.Empty;
-                    jsonStruct.Fields.Add(propKey, Value.ForString(strValue));
-                    CheckForSpecialProperties(log, propKey, strValue);
+                    jsonStruct.Fields.Add(propKey, Value.ForString(scalarValue.Value?.ToString() ?? ""));
                     break;
 
                 case SequenceValue sequenceValue:
@@ -112,7 +99,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 case DictionaryValue dictionaryValue:
                     var dictionaryChild = new Struct();
                     foreach (var childProperty in dictionaryValue.Elements)
-                        WritePropertyAsJson(log, dictionaryChild, childProperty.Key.Value?.ToString() ?? String.Empty, childProperty.Value);
+                        WritePropertyAsJson(log, dictionaryChild, childProperty.Key.Value?.ToString() ?? "", childProperty.Value);
 
                     jsonStruct.Fields.Add(propKey, Value.ForStruct(dictionaryChild));
                     break;
@@ -128,9 +115,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             switch (propValue)
             {
                 case ScalarValue scalarValue:
-                    var stringValue = scalarValue.Value?.ToString() ?? String.Empty;
-                    log.Labels.Add(propKey, stringValue);
-                    CheckForSpecialProperties(log, propKey, stringValue);
+                    log.Labels.Add(propKey, scalarValue.Value?.ToString() ?? "");
                     break;
 
                 case SequenceValue sequenceValue:
@@ -139,42 +124,27 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
                 case StructureValue structureValue when structureValue.Properties.Count > 0:
                     foreach (var childProperty in structureValue.Properties)
-                        WritePropertyAsLabel(log, propKey + "." + childProperty.Name, childProperty.Value);
+                        WritePropertyAsLabel(log, $"{propKey}.{childProperty.Name}", childProperty.Value);
 
                     break;
 
                 case DictionaryValue dictionaryValue when dictionaryValue.Elements.Count > 0:
                     foreach (var childProperty in dictionaryValue.Elements)
-                        WritePropertyAsLabel(log, propKey + "." + childProperty.Key.ToString().Replace("\"", ""), childProperty.Value);
+                        WritePropertyAsLabel(log, $"{propKey}.{childProperty.Key.Value?.ToString()?.Replace("\"", "")}", childProperty.Value);
 
                     break;
-            }
-        }
-
-        private void CheckForSpecialProperties(LogEntry log, string key, string value)
-        {
-            if (_useSourceContextAsLogName && key.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
-                log.LogName = CreateLogName(_projectId, value);
-
-            if (_useLogCorrelation)
-            {
-                if (key.Equals("TraceId", StringComparison.OrdinalIgnoreCase))
-                    log.Trace = $"projects/{_projectId}/traces/{value}";
-
-                if (key.Equals("SpanId", StringComparison.OrdinalIgnoreCase))
-                    log.SpanId = value;
             }
         }
 
         public static string CreateLogName(string projectId, string name)
         {
             // cache log name to avoid formatting name for every statement
-            // TODO: potential memory leak because cached names are never cleared, however shouldnt be an issue even with thousands of entries
+            // TODO: potential memory leak because cached names are never cleared, however it shouldnt be an issue even with thousands of entries
             if (!LogNameCache.TryGetValue(name, out var logName))
             {
-                // name must only contain letters, numbers, underscore, hyphen, forward slash and period
+                // name must only contain: letters, numbers, underscore, hyphen, forward slash, period
                 // limited to 512 characters and must be url-encoded
-                var safeChars = LogNameUnsafeChars.Replace(name, String.Empty);
+                var safeChars = LogNameUnsafeChars.Replace(name, "");
                 var clean = UrlEncoder.Default.Encode(safeChars);
 
                 // LogName class creates templated string matching GCP requirements

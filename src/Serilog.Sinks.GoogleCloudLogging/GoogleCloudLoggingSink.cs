@@ -19,6 +19,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly GoogleCloudLoggingSinkOptions _sinkOptions;
         private readonly LoggingServiceV2Client _client;
         private readonly MonitoredResource _resource;
+        private readonly string _projectId;
         private readonly string _logName;
         private readonly LogFormatter _logFormatter;
         private readonly Struct? _serviceContext;
@@ -27,11 +28,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
         {
             _sinkOptions = sinkOptions;
 
-            // logging client for google cloud apis
-            _client = _sinkOptions.GoogleCredentialJson != null
-                ? new LoggingServiceV2ClientBuilder { JsonCredentials = _sinkOptions.GoogleCredentialJson }.Build()
-                : LoggingServiceV2Client.Create();
-
             // retrieve current environment details automatically for GCE, GKE, GAE, or Cloud Run
             // set any user-provided resource type and labels which will override existing values from environment
             _resource = MonitoredResourceBuilder.FromPlatform();
@@ -39,15 +35,15 @@ namespace Serilog.Sinks.GoogleCloudLogging
             foreach (var kvp in _sinkOptions.ResourceLabels)
                 _resource.Labels[kvp.Key] = kvp.Value;
 
-            var projectId = _sinkOptions.ProjectId ?? (_resource.Labels.TryGetValue("project_id", out string id) ? id : null);
-            if (String.IsNullOrWhiteSpace(projectId))
-                throw new ArgumentNullException(nameof(projectId), "Project Id is not provided and could not be automatically discovered.");
+            _projectId = _sinkOptions.ProjectId ?? (_resource.Labels.TryGetValue("project_id", out string id) ? id : null) ?? "";
+            if (String.IsNullOrWhiteSpace(_projectId))
+                throw new ArgumentNullException(nameof(_projectId), "Project Id is not provided and could not be automatically discovered.");
 
             if (String.IsNullOrWhiteSpace(_sinkOptions.LogName))
                 throw new ArgumentNullException(nameof(_sinkOptions.LogName), "Log Name is null. Either unset to use default value or check assignment.");
 
-            _logName = LogFormatter.CreateLogName(projectId, _sinkOptions.LogName);
-            _logFormatter = new LogFormatter(projectId, _sinkOptions.UseSourceContextAsLogName, _sinkOptions.UseLogCorrelation, messageTemplateTextFormatter);
+            _logName = LogFormatter.CreateLogName(_projectId, _sinkOptions.LogName);
+            _logFormatter = new LogFormatter(messageTemplateTextFormatter);
 
             // cache struct for service name and version contextual properties if available
             // these properties are required for any logged exceptions to automatically be picked up by cloud error reporting
@@ -58,6 +54,11 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 if (!String.IsNullOrWhiteSpace(_sinkOptions.ServiceVersion))
                     _serviceContext.Fields.Add("version", Value.ForString(_sinkOptions.ServiceVersion));
             }
+
+            // logging client for google cloud apis
+            _client = _sinkOptions.GoogleCredentialJson != null
+                ? new LoggingServiceV2ClientBuilder { JsonCredentials = _sinkOptions.GoogleCredentialJson }.Build()
+                : LoggingServiceV2Client.Create();
         }
 
         public Task EmitBatchAsync(IEnumerable<LogEvent> events)
@@ -67,10 +68,9 @@ namespace Serilog.Sinks.GoogleCloudLogging
             foreach (var evnt in events)
                 entries.Add(CreateLogEntry(evnt, writer));
 
-            if (entries.Count > 0)
-                return _client.WriteLogEntriesAsync(_logName, _resource, _sinkOptions.Labels, entries, CancellationToken.None);
-
-            return Task.CompletedTask;
+            return entries.Count > 0
+                ? _client.WriteLogEntriesAsync(_logName, _resource, _sinkOptions.Labels, entries, CancellationToken.None)
+                : Task.CompletedTask;
         }
 
         private LogEntry CreateLogEntry(LogEvent evnt, StringWriter writer)
@@ -89,8 +89,10 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
                 var propStruct = new Struct();
                 foreach (var property in evnt.Properties)
+                {
                     _logFormatter.WritePropertyAsJson(log, propStruct, property.Key, property.Value);
-
+                    CheckForSpecialProperties(log, property.Key, property.Value);
+                }
                 jsonPayload.Fields.Add("properties", Value.ForStruct(propStruct));
 
                 if (_serviceContext != null)
@@ -104,10 +106,27 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 log.TextPayload = _logFormatter.RenderEventMessage(evnt, writer);
 
                 foreach (var property in evnt.Properties)
+                {
                     _logFormatter.WritePropertyAsLabel(log, property.Key, property.Value);
+                    CheckForSpecialProperties(log, property.Key, property.Value);
+                }
             }
 
             return log;
+        }
+
+        private void CheckForSpecialProperties(LogEntry log, string key, LogEventPropertyValue value)
+        {
+            if (_sinkOptions.UseSourceContextAsLogName && key.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
+                log.LogName = LogFormatter.CreateLogName(_projectId, GetString(value));
+
+            if (_sinkOptions.UseLogCorrelation && key.Equals("TraceId", StringComparison.OrdinalIgnoreCase))
+                log.Trace = $"projects/{_projectId}/traces/{GetString(value)}";
+
+            if (_sinkOptions.UseLogCorrelation && key.Equals("SpanId", StringComparison.OrdinalIgnoreCase))
+                log.SpanId = GetString(value);
+
+            static string GetString(LogEventPropertyValue v) => (v as ScalarValue)?.Value?.ToString() ?? "";
         }
 
         private static LogSeverity TranslateSeverity(LogEventLevel level) => level switch
@@ -121,9 +140,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
             _ => LogSeverity.Default
         };
 
-        public Task OnEmptyBatchAsync()
-        {
-            return Task.CompletedTask;
-        }
+        public Task OnEmptyBatchAsync() => Task.CompletedTask;
     }
 }
