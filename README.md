@@ -1,6 +1,6 @@
 # Serilog.Sinks.GoogleCloudLogging
 
-Serilog sink that writes events to [Google Cloud Platform Stackdriver Logging](https://cloud.google.com/logging/).
+Serilog sink that writes events to [Google Cloud Logging](https://cloud.google.com/logging/).
 
 Built for `netstandard2.0`, `net5.0`
 
@@ -68,7 +68,7 @@ Name | Default | Description
 `UseSourceContextAsLogName` | True | The log name for a log entry will be set to the [SourceContext](https://github.com/serilog/serilog/wiki/Writing-Log-Events#source-contexts) property if it's available.
 `UseJsonOutput` | False | Structured logs can be sent as text with labels or as a JSON object, see details below.
 `GoogleCredentialJson` | | GCP client libraries use [Application Default Credentials](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application). If these are not available or you need to use other credentials, set the JSON text of a credential file directly.
-`ServiceName` | | Name of the service added as metadata to log entries. Required to forward logged exceptions to StackDriver Error Reporting. Must also set `UseJsonOutput` to true.
+`ServiceName` | | Name of the service added as metadata to log entries. Required to forward logged exceptions to Google Cloud Error Reporting. Must also set `UseJsonOutput` to true.
 `ServiceVersion` | | Version of the service added as metadata to log entries.
 
 #### Output Type
@@ -81,7 +81,7 @@ WARNING: JSON output only accepts numeric values as `double` so all numbers will
 
 #### Log Level Mapping
 
-This table shows the mapping from Serilog [`LogLevel`](https://github.com/serilog/serilog/wiki/Configuration-Basics#minimum-level) to Stackdriver [`LogSeverity`](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity)
+This table shows the mapping from Serilog [`LogLevel`](https://github.com/serilog/serilog/wiki/Configuration-Basics#minimum-level) to Google Cloud Logging [`LogSeverity`](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity)
 
 Serilog | Cloud Logging
 ------------- | -----------------
