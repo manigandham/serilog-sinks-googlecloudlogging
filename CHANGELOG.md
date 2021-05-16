@@ -8,25 +8,18 @@ Readme: https://github.com/manigandham/serilog-sinks-googlecloudlogging/blob/mas
 - Updated nuget references to latest versions.
 
 ## 3.3.3
-- Fixed bug with incorrect log correlation trace/span ids.
-
-## 3.3.2
 - Added `UseLogCorrelation` option to allow log integration with [Google Cloud Trace](https://cloud.google.com/trace/docs/trace-log-integration). Defaults to `true`.
+- Fixed bug with incorrect log correlation trace/span ids.
 - Updated nuget references to latest versions.
 - Added `net5.0` framework target.
-
-## 3.3.1
-- Updated nuget references to latest versions.
 
 ## 3.3.0
 - Added new config property for minimal logging level for sink.
 - Added support for level switch to change minimum logging level at runtime.
 
 ## 3.2.0
-- Fixed bug with `IBatchedLogEventSink` implementation.
-
-## 3.1.0
 - Updated nuget references and used new `IBatchedLogEventSink` interface for `Serilog.Sinks.PeriodicBatching`.
+- Fixed bug with `IBatchedLogEventSink` implementation.
 - Added `QueueSize` parameter for internal batching queue. See [`PeriodicBatchingSinkOptions`](https://github.com/serilog/serilog-sinks-periodicbatching/blob/dev/src/Serilog.Sinks.PeriodicBatching/Sinks/PeriodicBatching/PeriodicBatchingSinkOptions.cs) for details.
 
 ## 3.0.0
@@ -40,7 +33,7 @@ Readme: https://github.com/manigandham/serilog-sinks-googlecloudlogging/blob/mas
 - Improved logging performance (`StringWriter` reuse) and cache log names (using a static dictionary).
 
 ## 2.3.0
-- Log names are automatically formatted to match requirements (trim unsafe characters and use url-encoding).
+- Log names are automatically formatted to match requirements (trim unsafe characters and apply URL encoding).
 
 ## 2.2.1
 - Updated nuget references to latest versions.
