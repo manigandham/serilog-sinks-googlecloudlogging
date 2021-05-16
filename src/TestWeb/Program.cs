@@ -18,8 +18,8 @@ namespace TestWeb
             Serilog.Debugging.SelfLog.Enable(Console.WriteLine);
 
             // sink can be configured from appsettings.json or using code, both examples in methods below
-            SetOptionsFromAppSettings();
-            // SetOptionsProgrammatically();
+            //SetOptionsFromAppSettings();
+            SetOptionsProgrammatically();
 
             BuildWebHost(args).Run();
         }
@@ -37,11 +37,12 @@ namespace TestWeb
 
         private static void SetOptionsProgrammatically()
         {
-            var options = new GoogleCloudLoggingSinkOptions("PROJECT-ID-HERE-12345")
+            var options = new GoogleCloudLoggingSinkOptions
             {
-                ResourceType = "k8s_cluster",
+                ProjectId = "PROJECT-ID-12345",
+                ResourceType = "gce_instance",
                 LogName = "someLogName",
-                UseSourceContextAsLogName = false,
+                UseSourceContextAsLogName = true,
                 UseJsonOutput = true
             };
 
@@ -62,10 +63,7 @@ namespace TestWeb
                 {
                     app.UseDeveloperExceptionPage();
                     app.UseRouting();
-                    app.UseEndpoints(builder =>
-                    {
-                        builder.MapDefaultControllerRoute();
-                    });
+                    app.UseEndpoints(builder => builder.MapDefaultControllerRoute());
                 })
                 .UseSerilog() // Add this to send all built-in logging to Serilog
                 .Build();
