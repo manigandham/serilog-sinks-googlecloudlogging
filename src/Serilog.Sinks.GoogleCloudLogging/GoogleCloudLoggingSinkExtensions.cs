@@ -9,9 +9,17 @@ using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.GoogleCloudLogging
 {
+
     public static class GoogleCloudLoggingSinkExtensions
     {
-        /// <summary>
+         private static ITextFormatter? DetermineFormatter(string? outputTemplate, ITextFormatter? textFormatter)
+         {
+             if (outputTemplate != null && textFormatter != null)
+                 throw new ArgumentException("Provide only outputTemplate or textFormatter");
+             return outputTemplate != null ? new MessageTemplateTextFormatter(outputTemplate) : textFormatter;
+         }
+
+         /// <summary>
         /// Writes log events to Google Cloud Logging.
         /// </summary>
         /// <param name="loggerConfiguration">Logger sink configuration.</param>
@@ -42,8 +50,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 QueueLimit = queueLimit
             };
 
-            var formatter = outputTemplate != null ? new MessageTemplateTextFormatter(outputTemplate) : textFormatter;
-            var sink = new GoogleCloudLoggingSink(sinkOptions, formatter);
+            var sink = new GoogleCloudLoggingSink(sinkOptions, DetermineFormatter(outputTemplate, textFormatter));
             var batchingSink = new PeriodicBatchingSink(sink, batchingOptions);
 
             return loggerConfiguration.Sink(batchingSink, restrictedToMinimumLevel, levelSwitch);
