@@ -14,25 +14,24 @@ namespace Serilog.Sinks.GoogleCloudLogging
 {
     internal class LogFormatter
     {
-        private readonly MessageTemplateTextFormatter? _messageTemplateTextFormatter;
+        private readonly ITextFormatter? _textFormatter;
 
         private static readonly Dictionary<string, string> LogNameCache = new(StringComparer.Ordinal);
         private static readonly Regex LogNameUnsafeChars = new("[^0-9A-Z._/-]+", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
 
-        public LogFormatter(MessageTemplateTextFormatter? messageTemplateTextFormatter)
+        public LogFormatter(ITextFormatter? textFormatter)
         {
-            _messageTemplateTextFormatter = messageTemplateTextFormatter;
+            _textFormatter = textFormatter;
         }
 
-        public string RenderEventMessage(ITextFormatter? formatter, LogEvent e, StringWriter writer)
+        public string RenderEventMessage(LogEvent e, StringWriter writer)
         {
             writer.GetStringBuilder().Clear();
-            formatter?.Format(e, writer);
 
             // output template takes priority for formatting event
-            if (_messageTemplateTextFormatter != null)
+            if (_textFormatter != null)
             {
-                _messageTemplateTextFormatter.Format(e, writer);
+                _textFormatter.Format(e, writer);
             }
             else
             {
@@ -48,7 +47,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
                     writer.Write(e.Exception.ToString());
                 }
             }
-
             return writer.ToString();
         }
 
