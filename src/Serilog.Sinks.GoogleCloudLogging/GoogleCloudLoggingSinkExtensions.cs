@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Serilog.Configuration;
 using Serilog.Core;
 using Serilog.Events;
+using Serilog.Formatting;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.PeriodicBatching;
 
@@ -58,6 +59,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             string? projectId = null,
             string? resourceType = null,
             string? logName = null,
+            ITextFormatter? formatter = null,
             Dictionary<string, string>? labels = null,
             Dictionary<string, string>? resourceLabels = null,
             bool useSourceContextAsLogName = true,
@@ -77,6 +79,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 projectId,
                 resourceType,
                 logName,
+                formatter,
                 labels,
                 resourceLabels,
                 useSourceContextAsLogName,

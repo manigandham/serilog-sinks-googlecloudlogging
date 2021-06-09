@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Serilog.Formatting;
 
 namespace Serilog.Sinks.GoogleCloudLogging
 {
@@ -114,10 +115,17 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// Attach service version to log entries (added as `serviceContext.version` metadata in `jsonPayload`).
         /// Required for logged exceptions to be forwarded to StackDriver Error Reporting. Must enable <see cref="UseJsonOutput"/>.
         /// </param>
+
+        /// <summary>
+        /// Controls the rendering of the logs events
+        /// </summary>
+        public ITextFormatter? Formatter { get; set; }
+        
         public GoogleCloudLoggingSinkOptions(
             string? projectId = null,
             string? resourceType = null,
             string? logName = null,
+            ITextFormatter? formatter = null,
             Dictionary<string, string>? labels = null,
             Dictionary<string, string>? resourceLabels = null,
             bool useSourceContextAsLogName = true,
@@ -145,6 +153,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             GoogleCredentialJson = googleCredentialJson;
             ServiceName = serviceName;
             ServiceVersion = serviceVersion;
+            Formatter = formatter ?? Formatter;
         }
     }
 }

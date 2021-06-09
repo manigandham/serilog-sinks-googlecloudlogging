@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Google.Cloud.Logging.V2;
 using Google.Protobuf.WellKnownTypes;
 using Serilog.Events;
+using Serilog.Formatting;
 using Serilog.Formatting.Display;
 
 namespace Serilog.Sinks.GoogleCloudLogging
@@ -23,9 +24,10 @@ namespace Serilog.Sinks.GoogleCloudLogging
             _messageTemplateTextFormatter = messageTemplateTextFormatter;
         }
 
-        public string RenderEventMessage(LogEvent e, StringWriter writer)
+        public string RenderEventMessage(ITextFormatter? formatter, LogEvent e, StringWriter writer)
         {
             writer.GetStringBuilder().Clear();
+            formatter?.Format(e, writer);
 
             // output template takes priority for formatting event
             if (_messageTemplateTextFormatter != null)

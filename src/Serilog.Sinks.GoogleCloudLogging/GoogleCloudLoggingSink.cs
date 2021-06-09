@@ -85,7 +85,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             {
                 // json output builds up a protobuf object to be serialized in cloud logging
                 var jsonPayload = new Struct();
-                jsonPayload.Fields.Add("message", Value.ForString(_logFormatter.RenderEventMessage(evnt, writer)));
+                jsonPayload.Fields.Add("message", Value.ForString(_logFormatter.RenderEventMessage(_sinkOptions.Formatter, evnt, writer)));
 
                 var propStruct = new Struct();
                 foreach (var property in evnt.Properties)
@@ -103,7 +103,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             else
             {
                 // text output is simple stringification
-                log.TextPayload = _logFormatter.RenderEventMessage(evnt, writer);
+                log.TextPayload = _logFormatter.RenderEventMessage(_sinkOptions.Formatter, evnt, writer);
 
                 foreach (var property in evnt.Properties)
                 {
