@@ -19,6 +19,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <param name="batchSizeLimit">The maximum number of events to include in a single batch. The default is 100.</param>
         /// <param name="period">The time to wait between checking for event batches. The default is five seconds.</param>
         /// <param name="queueLimit">Maximum number of events in the queue. If not specified, uses an unbounded queue.</param>
+        /// <param name="outputTemplate">A message template describing the format used to write to the sink.</param>
+        /// <param name="textFormatter">Controls the rendering of the log events.</param>
         /// <param name="restrictedToMinimumLevel">The minimum level for events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
         /// <param name="levelSwitch">A switch allowing the pass-through minimum level to be changed at runtime.</param>
         /// <returns>Configuration object allowing method chaining.</returns>
@@ -28,6 +30,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
             int? batchSizeLimit = null,
             TimeSpan? period = null,
             int? queueLimit = null,
+            string? outputTemplate = null,
+            ITextFormatter? textFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             LoggingLevelSwitch? levelSwitch = null)
         {
@@ -38,7 +42,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 QueueLimit = queueLimit
             };
 
-            var sink = new GoogleCloudLoggingSink(sinkOptions, sinkOptions.Formatter);
+            var formatter = outputTemplate != null ? new MessageTemplateTextFormatter(outputTemplate) : textFormatter;
+            var sink = new GoogleCloudLoggingSink(sinkOptions, formatter);
             var batchingSink = new PeriodicBatchingSink(sink, batchingOptions);
 
             return loggerConfiguration.Sink(batchingSink, restrictedToMinimumLevel, levelSwitch);
@@ -66,6 +71,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             int? batchSizeLimit = null,
             TimeSpan? period = null,
             int? queueLimit = null,
+            string? outputTemplate = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             LoggingLevelSwitch? levelSwitch = null)
         {
@@ -73,7 +79,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 projectId,
                 resourceType,
                 logName,
-                formatter,
                 labels,
                 resourceLabels,
                 useSourceContextAsLogName,
@@ -89,6 +94,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 batchSizeLimit,
                 period,
                 queueLimit,
+                outputTemplate,
+                formatter,
                 restrictedToMinimumLevel,
                 levelSwitch
             );
