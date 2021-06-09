@@ -15,7 +15,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
          private static ITextFormatter? DetermineFormatter(string? outputTemplate, ITextFormatter? textFormatter)
          {
              if (outputTemplate != null && textFormatter != null)
-                 throw new ArgumentException("Provide only outputTemplate or textFormatter");
+                 throw new ArgumentException("Provide only outputTemplate or formatter");
              return outputTemplate != null ? new MessageTemplateTextFormatter(outputTemplate) : textFormatter;
          }
 
