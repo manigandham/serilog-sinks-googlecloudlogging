@@ -11,14 +11,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
 {
     public static class GoogleCloudLoggingSinkExtensions
     {
-        private static ITextFormatter? DetermineFormatter(string? outputTemplate, ITextFormatter? textFormatter)
-        {
-            if (outputTemplate != null && textFormatter != null)
-                throw new ArgumentException("Provide only outputTemplate or formatter");
-
-            return outputTemplate != null ? new MessageTemplateTextFormatter(outputTemplate) : textFormatter;
-        }
-
         /// <summary>
         /// Writes log events to Google Cloud Logging.
         /// </summary>
@@ -28,7 +20,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <param name="period">The time to wait between checking for event batches. The default is five seconds.</param>
         /// <param name="queueLimit">Maximum number of events in the queue. If not specified, uses an unbounded queue.</param>
         /// <param name="outputTemplate">A message template describing the format used to write to the sink.</param>
-        /// <param name="textFormatter">Controls the rendering of the log events.</param>
+        /// <param name="textFormatter">Custom formatter for of log events. Will override output template parameter.</param>
         /// <param name="restrictedToMinimumLevel">The minimum level for events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
         /// <param name="levelSwitch">A switch allowing the pass-through minimum level to be changed at runtime.</param>
         /// <returns>Configuration object allowing method chaining.</returns>
@@ -43,6 +35,10 @@ namespace Serilog.Sinks.GoogleCloudLogging
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             LoggingLevelSwitch? levelSwitch = null)
         {
+            // use provided text formatter or create one from output template 
+            // formatter can be null if neither parameters are provided
+            textFormatter ??= !String.IsNullOrWhiteSpace(outputTemplate) ? new MessageTemplateTextFormatter(outputTemplate) : null;
+
             var batchingOptions = new PeriodicBatchingSinkOptions
             {
                 BatchSizeLimit = batchSizeLimit ?? 100,
@@ -50,7 +46,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 QueueLimit = queueLimit
             };
 
-            var sink = new GoogleCloudLoggingSink(sinkOptions, DetermineFormatter(outputTemplate, textFormatter));
+            var sink = new GoogleCloudLoggingSink(sinkOptions, textFormatter);
             var batchingSink = new PeriodicBatchingSink(sink, batchingOptions);
 
             return loggerConfiguration.Sink(batchingSink, restrictedToMinimumLevel, levelSwitch);
