@@ -9,6 +9,7 @@ using Google.Cloud.Logging.Type;
 using Google.Cloud.Logging.V2;
 using Google.Protobuf.WellKnownTypes;
 using Serilog.Events;
+using Serilog.Formatting;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.PeriodicBatching;
 
@@ -24,7 +25,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly LogFormatter _logFormatter;
         private readonly Struct? _serviceContext;
 
-        public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, MessageTemplateTextFormatter? messageTemplateTextFormatter)
+        public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, ITextFormatter? textFormatter)
         {
             _sinkOptions = sinkOptions;
 
@@ -43,7 +44,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 throw new ArgumentNullException(nameof(_sinkOptions.LogName), "Log Name is null. Either unset to use default value or check assignment.");
 
             _logName = LogFormatter.CreateLogName(_projectId, _sinkOptions.LogName);
-            _logFormatter = new LogFormatter(messageTemplateTextFormatter);
+            _logFormatter = new LogFormatter(textFormatter);
 
             // cache struct for service name and version contextual properties if available
             // these properties are required for any logged exceptions to automatically be picked up by cloud error reporting
