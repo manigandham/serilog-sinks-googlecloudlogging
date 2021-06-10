@@ -2,6 +2,11 @@
 
 Readme: https://github.com/manigandham/serilog-sinks-googlecloudlogging/blob/master/README.md
 
+## 3.5.0
+- Refactored sink to accept [`ITextFormatter`](https://github.com/serilog/serilog/wiki/Formatting-Output#custom-text-formatters) for full control over rendering a log event.
+- Config validation on sink initialization will throw exceptions for known bad config values.
+- Performance improvements and reduced allocations.
+
 ## 3.4.0
 - Enabled nullable reference types for project and updated type definitions for extra safety.
 - Improved XML comments and documentation.
