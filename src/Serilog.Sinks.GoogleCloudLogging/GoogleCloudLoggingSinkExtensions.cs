@@ -9,17 +9,17 @@ using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.GoogleCloudLogging
 {
-
     public static class GoogleCloudLoggingSinkExtensions
     {
-         private static ITextFormatter? DetermineFormatter(string? outputTemplate, ITextFormatter? textFormatter)
-         {
-             if (outputTemplate != null && textFormatter != null)
-                 throw new ArgumentException("Provide only outputTemplate or formatter");
-             return outputTemplate != null ? new MessageTemplateTextFormatter(outputTemplate) : textFormatter;
-         }
+        private static ITextFormatter? DetermineFormatter(string? outputTemplate, ITextFormatter? textFormatter)
+        {
+            if (outputTemplate != null && textFormatter != null)
+                throw new ArgumentException("Provide only outputTemplate or formatter");
 
-         /// <summary>
+            return outputTemplate != null ? new MessageTemplateTextFormatter(outputTemplate) : textFormatter;
+        }
+
+        /// <summary>
         /// Writes log events to Google Cloud Logging.
         /// </summary>
         /// <param name="loggerConfiguration">Logger sink configuration.</param>
@@ -58,7 +58,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
         /// <summary>
         /// Overload that accepts all configuration settings as parameters to allow configuration in files using serilog-settings-configuration package.
-        /// This method creates a GoogleCloudLoggingSinkOptions and calls the standard constructor above.
+        /// This method creates a GoogleCloudLoggingSinkOptions object and calls the standard constructor above.
         /// </summary>
         /// <returns>Configuration object allowing method chaining.</returns>
         public static LoggerConfiguration GoogleCloudLogging(
@@ -66,7 +66,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
             string? projectId = null,
             string? resourceType = null,
             string? logName = null,
-            ITextFormatter? formatter = null,
             Dictionary<string, string>? labels = null,
             Dictionary<string, string>? resourceLabels = null,
             bool useSourceContextAsLogName = true,
@@ -79,6 +78,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             TimeSpan? period = null,
             int? queueLimit = null,
             string? outputTemplate = null,
+            ITextFormatter? textFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             LoggingLevelSwitch? levelSwitch = null)
         {
@@ -102,7 +102,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 period,
                 queueLimit,
                 outputTemplate,
-                formatter,
+                textFormatter,
                 restrictedToMinimumLevel,
                 levelSwitch
             );

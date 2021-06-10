@@ -10,7 +10,6 @@ using Google.Cloud.Logging.V2;
 using Google.Protobuf.WellKnownTypes;
 using Serilog.Events;
 using Serilog.Formatting;
-using Serilog.Formatting.Display;
 using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.GoogleCloudLogging
@@ -41,7 +40,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 throw new ArgumentNullException(nameof(_projectId), "Project Id is not provided and could not be automatically discovered.");
 
             if (String.IsNullOrWhiteSpace(_sinkOptions.LogName))
-                throw new ArgumentNullException(nameof(_sinkOptions.LogName), "Log Name is null. Either unset to use default value or check assignment.");
+                throw new ArgumentNullException(nameof(_sinkOptions.LogName), "Log Name is blank. Check assigned value or unset to use default.");
 
             _logName = LogFormatter.CreateLogName(_projectId, _sinkOptions.LogName);
             _logFormatter = new LogFormatter(textFormatter);
@@ -94,6 +93,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                     _logFormatter.WritePropertyAsJson(log, propStruct, property.Key, property.Value);
                     CheckForSpecialProperties(log, property.Key, property.Value);
                 }
+
                 jsonPayload.Fields.Add("properties", Value.ForStruct(propStruct));
 
                 if (_serviceContext != null)

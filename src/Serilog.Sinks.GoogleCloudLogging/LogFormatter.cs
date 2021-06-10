@@ -8,7 +8,6 @@ using Google.Cloud.Logging.V2;
 using Google.Protobuf.WellKnownTypes;
 using Serilog.Events;
 using Serilog.Formatting;
-using Serilog.Formatting.Display;
 
 namespace Serilog.Sinks.GoogleCloudLogging
 {
@@ -28,7 +27,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         {
             writer.GetStringBuilder().Clear();
 
-            // output template takes priority for formatting event
+            // use formatter if provided
             if (_textFormatter != null)
             {
                 _textFormatter.Format(e, writer);
@@ -47,6 +46,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                     writer.Write(e.Exception.ToString());
                 }
             }
+
             return writer.ToString();
         }
 
