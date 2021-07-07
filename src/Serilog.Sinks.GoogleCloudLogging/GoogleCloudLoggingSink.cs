@@ -90,8 +90,10 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 var propStruct = new Struct();
                 foreach (var property in evnt.Properties)
                 {
-                    _logFormatter.WritePropertyAsJson(log, propStruct, property.Key, property.Value);
-                    CheckForSpecialProperties(log, property.Key, property.Value);
+                    if (!TryWriteSpecialProperty(log, property.Key, property.Value))
+                    {
+                        _logFormatter.WritePropertyAsJson(log, propStruct, property.Key, property.Value);
+                    }
                 }
 
                 jsonPayload.Fields.Add("properties", Value.ForStruct(propStruct));
@@ -108,27 +110,43 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
                 foreach (var property in evnt.Properties)
                 {
-                    _logFormatter.WritePropertyAsLabel(log, property.Key, property.Value);
-                    CheckForSpecialProperties(log, property.Key, property.Value);
+                    if (!TryWriteSpecialProperty(log, property.Key, property.Value))
+                    {
+                        _logFormatter.WritePropertyAsLabel(log, property.Key, property.Value);
+                    }
                 }
             }
 
             return log;
         }
 
-        private void CheckForSpecialProperties(LogEntry log, string key, LogEventPropertyValue value)
+        private bool TryWriteSpecialProperty(LogEntry log, string key, LogEventPropertyValue value)
         {
             if (_sinkOptions.UseSourceContextAsLogName && key.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
+            {
                 log.LogName = LogFormatter.CreateLogName(_projectId, GetString(value));
+                return true;
+            }
 
             if (_sinkOptions.UseLogCorrelation && key.Equals("TraceId", StringComparison.OrdinalIgnoreCase))
+            {
                 log.Trace = $"projects/{_projectId}/traces/{GetString(value)}";
+                return true;
+            }
 
             if (_sinkOptions.UseLogCorrelation && key.Equals("SpanId", StringComparison.OrdinalIgnoreCase))
+            {
                 log.SpanId = GetString(value);
+                return true;
+            }
 
             if (_sinkOptions.UseLogCorrelation && key.Equals("TraceSampled", StringComparison.OrdinalIgnoreCase))
+            {
                 log.TraceSampled = GetBoolean(value);
+                return true;
+            }
+
+            return false;
 
             static string GetString(LogEventPropertyValue v) => (v as ScalarValue)?.Value?.ToString() ?? "";
             static bool GetBoolean(LogEventPropertyValue v) => (v as ScalarValue)?.Value is true;
