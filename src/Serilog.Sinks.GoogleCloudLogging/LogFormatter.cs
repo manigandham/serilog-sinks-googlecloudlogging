@@ -125,13 +125,11 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 case StructureValue structureValue when structureValue.Properties.Count > 0:
                     foreach (var childProperty in structureValue.Properties)
                         WritePropertyAsLabel(log, $"{propKey}.{childProperty.Name}", childProperty.Value);
-
                     break;
 
                 case DictionaryValue dictionaryValue when dictionaryValue.Elements.Count > 0:
                     foreach (var childProperty in dictionaryValue.Elements)
                         WritePropertyAsLabel(log, $"{propKey}.{childProperty.Key.Value?.ToString()?.Replace("\"", "")}", childProperty.Value);
-
                     break;
             }
         }
