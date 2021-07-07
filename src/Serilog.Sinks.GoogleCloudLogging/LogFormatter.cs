@@ -119,19 +119,17 @@ namespace Serilog.Sinks.GoogleCloudLogging
                     break;
 
                 case SequenceValue sequenceValue:
-                    log.Labels.Add(propKey, String.Join(",", sequenceValue.Elements));
+                    log.Labels.Add(propKey, string.Join(",", sequenceValue.Elements));
                     break;
 
                 case StructureValue structureValue when structureValue.Properties.Count > 0:
                     foreach (var childProperty in structureValue.Properties)
                         WritePropertyAsLabel(log, $"{propKey}.{childProperty.Name}", childProperty.Value);
-
                     break;
 
                 case DictionaryValue dictionaryValue when dictionaryValue.Elements.Count > 0:
                     foreach (var childProperty in dictionaryValue.Elements)
                         WritePropertyAsLabel(log, $"{propKey}.{childProperty.Key.Value?.ToString()?.Replace("\"", "")}", childProperty.Value);
-
                     break;
             }
         }
@@ -139,7 +137,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public static string CreateLogName(string projectId, string name)
         {
             // cache log name to avoid formatting name for every statement
-            // TODO: potential memory leak because cached names are never cleared, however it shouldnt be an issue even with thousands of entries
+            // TODO: potential memory leak because cached names are never cleared, however it shouldn't be an issue even with thousands of entries
             if (!LogNameCache.TryGetValue(name, out var logName))
             {
                 // name must only contain: letters, numbers, underscore, hyphen, forward slash, period
