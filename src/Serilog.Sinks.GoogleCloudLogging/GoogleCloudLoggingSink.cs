@@ -127,7 +127,11 @@ namespace Serilog.Sinks.GoogleCloudLogging
             if (_sinkOptions.UseLogCorrelation && key.Equals("SpanId", StringComparison.OrdinalIgnoreCase))
                 log.SpanId = GetString(value);
 
+            if (_sinkOptions.UseLogCorrelation && key.Equals("TraceSampled", StringComparison.OrdinalIgnoreCase))
+                log.TraceSampled = GetBoolean(value);
+
             static string GetString(LogEventPropertyValue v) => (v as ScalarValue)?.Value?.ToString() ?? "";
+            static bool GetBoolean(LogEventPropertyValue v) => (v as ScalarValue)?.Value is true;
         }
 
         private static LogSeverity TranslateSeverity(LogEventLevel level) => level switch
