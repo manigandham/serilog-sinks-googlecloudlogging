@@ -2,6 +2,10 @@
 
 Readme: https://github.com/manigandham/serilog-sinks-googlecloudlogging/blob/master/README.md
 
+## 3.6.0
+- Add `TraceSampled` to log correlation set of properties.
+- Update documentation.
+
 ## 3.5.0
 - Refactored sink to accept [`ITextFormatter`](https://github.com/serilog/serilog/wiki/Formatting-Output#custom-text-formatters) for full control over rendering a log event.
 - Config validation on sink initialization will throw exceptions for known bad config values.

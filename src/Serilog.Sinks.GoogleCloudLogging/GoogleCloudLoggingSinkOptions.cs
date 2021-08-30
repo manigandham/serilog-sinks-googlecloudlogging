@@ -39,13 +39,13 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public bool UseSourceContextAsLogName { get; set; }
 
         /// <summary>
-        /// Serialize log entries as JSON object instead of strings to preserve structure and data types for rich querying.
+        /// Serialize log entries as JSON objects instead of strings to preserve structure and data types for rich querying.
         /// Disabled by default. Must be enabled for logged exceptions to be forwarded to StackDriver Error Reporting.
         /// </summary>
         public bool UseJsonOutput { get; set; }
 
         /// <summary>
-        /// Integrate logs with Cloud Trace by setting LogEntry.Trace and LogEntry.SpanId if the LogEvent contains TraceId and SpanId properties.
+        /// Integrate logs with Cloud Trace by setting `Trace`, `SpanId`, `TraceSampled` properties on the LogEvent.
         /// Required for Google Cloud Trace Log Correlation.
         /// See https://cloud.google.com/trace/docs/trace-log-integration
         /// </summary>
