@@ -119,7 +119,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                     break;
 
                 case SequenceValue sequenceValue:
-                    log.Labels.Add(propKey, string.Join(",", sequenceValue.Elements));
+                    log.Labels.Add(propKey, String.Join(",", sequenceValue.Elements));
                     break;
 
                 case StructureValue structureValue when structureValue.Properties.Count > 0:

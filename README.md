@@ -66,7 +66,8 @@ Name | Default | Description
 `Labels` | | `Dictionary<string, string>` of properties added to all log entries.
 `ResourceLabels` | | `Dictionary<string, string>` of properties added to all log entries, at the resource level. See [Monitored Resources and Services](https://cloud.google.com/logging/docs/api/v2/resource-list) for recognized labels.
 `UseSourceContextAsLogName` | True | The log name for a log entry will be set to the [SourceContext](https://github.com/serilog/serilog/wiki/Writing-Log-Events#source-contexts) property if it's available.
-`UseJsonOutput` | False | Structured logs can be sent as text with labels or as a JSON object, see details below.
+`UseJsonOutput` | False | Serialize log entries as JSON objects instead of strings to preserve structure and data types for rich querying. See details below.
+`UseLogCorrelation` | False | Integrate logs with Cloud Trace by setting `Trace`, `SpanId`, `TraceSampled` properties on the LogEvent.
 `GoogleCredentialJson` | | GCP client libraries use [Application Default Credentials](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application). If these are not available or you need to use other credentials, set the JSON text of a credential file directly.
 `ServiceName` | | Name of the service added as metadata to log entries. Required to forward logged exceptions to Google Cloud Error Reporting. Must also set `UseJsonOutput` to true.
 `ServiceVersion` | | Version of the service added as metadata to log entries.
