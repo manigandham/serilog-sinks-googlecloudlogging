@@ -24,6 +24,10 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly LogFormatter _logFormatter;
         private readonly Struct? _serviceContext;
 
+        // approximate 256KB max size for LogEntry so sized down to 250KB here to be safe
+        // https://cloud.google.com/logging/quotas
+        private const int MaxLogEntrySizeBytes = 250000;
+
         public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, ITextFormatter? textFormatter)
         {
             _sinkOptions = sinkOptions;
@@ -65,8 +69,15 @@ namespace Serilog.Sinks.GoogleCloudLogging
         {
             using var writer = new StringWriter();
             var entries = new List<LogEntry>();
+
             foreach (var evnt in events)
-                entries.Add(CreateLogEntry(evnt, writer));
+            {
+                var logEntry = CreateLogEntry(evnt, writer);
+                if (logEntry.CalculateSize() <= MaxLogEntrySizeBytes)
+                    entries.Add(logEntry);
+                else
+                    Debugging.SelfLog.WriteLine("Log entry is too large for Google Cloud Logging: {0}", GetLogEntryMessage(logEntry));
+            }
 
             return entries.Count > 0
                 ? _client.WriteLogEntriesAsync(_logName, _resource, _sinkOptions.Labels, entries, CancellationToken.None)
@@ -132,6 +143,14 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
             static string GetString(LogEventPropertyValue v) => (v as ScalarValue)?.Value?.ToString() ?? "";
             static bool GetBoolean(LogEventPropertyValue v) => (v as ScalarValue)?.Value is true;
+        }
+
+        private static string GetLogEntryMessage(LogEntry logEntry)
+        {
+            if (logEntry.JsonPayload.Fields.TryGetValue("message", out var message))
+                return message.StringValue;
+
+            return logEntry.TextPayload ?? string.Empty;
         }
 
         private static LogSeverity TranslateSeverity(LogEventLevel level) => level switch
