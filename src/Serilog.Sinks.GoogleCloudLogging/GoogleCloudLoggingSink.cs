@@ -99,13 +99,12 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 jsonPayload.Fields.Add("message", Value.ForString(_logFormatter.RenderEventMessage(evnt, writer)));
 
                 var propStruct = new Struct();
+                jsonPayload.Fields.Add("properties", Value.ForStruct(propStruct));
                 foreach (var property in evnt.Properties)
                 {
                     _logFormatter.WritePropertyAsJson(log, propStruct, property.Key, property.Value);
-                    CheckForSpecialProperties(log, property.Key, property.Value);
+                    HandleSpecialProperty(log, property.Key, property.Value);
                 }
-
-                jsonPayload.Fields.Add("properties", Value.ForStruct(propStruct));
 
                 if (_serviceContext != null)
                     jsonPayload.Fields.Add("serviceContext", Value.ForStruct(_serviceContext));
@@ -120,14 +119,14 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 foreach (var property in evnt.Properties)
                 {
                     _logFormatter.WritePropertyAsLabel(log, property.Key, property.Value);
-                    CheckForSpecialProperties(log, property.Key, property.Value);
+                    HandleSpecialProperty(log, property.Key, property.Value);
                 }
             }
 
             return log;
         }
 
-        private void CheckForSpecialProperties(LogEntry log, string key, LogEventPropertyValue value)
+        private void HandleSpecialProperty(LogEntry log, string key, LogEventPropertyValue value)
         {
             if (_sinkOptions.UseSourceContextAsLogName && key.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
                 log.LogName = LogFormatter.CreateLogName(_projectId, GetString(value));
@@ -150,7 +149,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
             if (logEntry.JsonPayload.Fields.TryGetValue("message", out var message))
                 return message.StringValue;
 
-            return logEntry.TextPayload ?? string.Empty;
+            return logEntry.TextPayload ?? "";
         }
 
         private static LogSeverity TranslateSeverity(LogEventLevel level) => level switch
