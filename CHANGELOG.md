@@ -2,9 +2,13 @@
 
 Readme: https://github.com/manigandham/serilog-sinks-googlecloudlogging/blob/master/README.md
 
+## 3.7.0
+- Added `net6.0` target framework.
+- Added check for max log entry size according to GCP limits: https://cloud.google.com/logging/quotas (set to 250KB because limits are approximate). Oversized messages will be logged to [Serilog SelfLog](https://github.com/serilog/serilog/wiki/Debugging-and-Diagnostics).
+
 ## 3.6.0
-- Add `TraceSampled` to log correlation set of properties.
-- Update documentation.
+- Added `TraceSampled` to log correlation set of properties.
+- Updated documentation.
 
 ## 3.5.0
 - Refactored sink to accept [`ITextFormatter`](https://github.com/serilog/serilog/wiki/Formatting-Output#custom-text-formatters) for full control over rendering a log event.
