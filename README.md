@@ -2,7 +2,7 @@
 
 Serilog sink that writes events to [Google Cloud Logging](https://cloud.google.com/logging/).
 
-Built for `netstandard2.0`, `net5.0`
+Built for `net6.0`, `net5.0`, `netstandard2.0`
 
 Release notes here: [CHANGELOG.md](CHANGELOG.md)
 
