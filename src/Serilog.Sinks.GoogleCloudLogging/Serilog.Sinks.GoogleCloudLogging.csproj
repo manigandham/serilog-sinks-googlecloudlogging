@@ -8,6 +8,7 @@
     <PackageIcon>serilog-sink-nuget.png</PackageIcon>
     <PackageIconUrl>https://raw.githubusercontent.com/manigandham/serilog-sinks-googlecloudlogging/master/src/Serilog.Sinks.GoogleCloudLogging/serilog-sink-nuget.png</PackageIconUrl>
     <PackageTags>serilog; sink; google cloud; stackdriver; logging;</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/manigandham/serilog-sinks-googlecloudlogging/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/manigandham/serilog-sinks-googlecloudlogging</PackageProjectUrl>
     <RepositoryUrl>https://github.com/manigandham/serilog-sinks-googlecloudlogging</RepositoryUrl>
@@ -24,6 +25,7 @@
 
   <ItemGroup>
     <None Include="serilog-sink-nuget.png" Pack="true" PackagePath="\" />
+    <None Include="../../README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
