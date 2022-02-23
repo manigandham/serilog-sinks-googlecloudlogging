@@ -53,7 +53,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// <summary>
         /// Writes event properties as a JSON object for a GCP log entry.
         /// </summary>
-        public void WritePropertyAsJson(LogEntry log, Struct jsonStruct, string propKey, LogEventPropertyValue propValue)
+        public void WritePropertyAsJson(Struct jsonStruct, string propKey, LogEventPropertyValue propValue)
         {
             switch (propValue)
             {
@@ -83,7 +83,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 case SequenceValue sequenceValue:
                     var sequenceChild = new Struct();
                     for (var i = 0; i < sequenceValue.Elements.Count; i++)
-                        WritePropertyAsJson(log, sequenceChild, i.ToString(), sequenceValue.Elements[i]);
+                        WritePropertyAsJson(sequenceChild, i.ToString(), sequenceValue.Elements[i]);
 
                     jsonStruct.Fields.Add(propKey, Value.ForList(sequenceChild.Fields.Values.ToArray()));
                     break;
@@ -91,7 +91,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 case StructureValue structureValue:
                     var structureChild = new Struct();
                     foreach (var childProperty in structureValue.Properties)
-                        WritePropertyAsJson(log, structureChild, childProperty.Name, childProperty.Value);
+                        WritePropertyAsJson(structureChild, childProperty.Name, childProperty.Value);
 
                     jsonStruct.Fields.Add(propKey, Value.ForStruct(structureChild));
                     break;
@@ -99,7 +99,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 case DictionaryValue dictionaryValue:
                     var dictionaryChild = new Struct();
                     foreach (var childProperty in dictionaryValue.Elements)
-                        WritePropertyAsJson(log, dictionaryChild, childProperty.Key.Value?.ToString() ?? "", childProperty.Value);
+                        WritePropertyAsJson(dictionaryChild, childProperty.Key.Value?.ToString() ?? "", childProperty.Value);
 
                     jsonStruct.Fields.Add(propKey, Value.ForStruct(dictionaryChild));
                     break;
@@ -141,12 +141,13 @@ namespace Serilog.Sinks.GoogleCloudLogging
             if (!LogNameCache.TryGetValue(name, out var logName))
             {
                 // name must only contain: letters, numbers, underscore, hyphen, forward slash, period
-                // limited to 512 characters and must be url-encoded
+                // limited to 512 characters and must be url-encoded (using 500 char limit here to be safe)
                 var safeChars = LogNameUnsafeChars.Replace(name, "");
-                var clean = UrlEncoder.Default.Encode(safeChars);
+                var truncated = safeChars.Length > 500 ? safeChars.Substring(0, 500) : safeChars;
+                var encoded = UrlEncoder.Default.Encode(safeChars);
 
                 // LogName class creates templated string matching GCP requirements
-                logName = new LogName(projectId, clean).ToString();
+                logName = new LogName(projectId, encoded).ToString();
 
                 LogNameCache.Add(name, logName);
             }

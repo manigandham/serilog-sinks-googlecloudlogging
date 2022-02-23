@@ -24,9 +24,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
         private readonly LogFormatter _logFormatter;
         private readonly Struct? _serviceContext;
 
-        // approximate 256KB max size for LogEntry so sized down to 250KB here to be safe
-        // https://cloud.google.com/logging/quotas
-        private const int MaxLogEntrySizeBytes = 250000;
 
         public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, ITextFormatter? textFormatter)
         {
@@ -73,7 +70,10 @@ namespace Serilog.Sinks.GoogleCloudLogging
             foreach (var evnt in events)
             {
                 var logEntry = CreateLogEntry(evnt, writer);
-                if (logEntry.CalculateSize() <= MaxLogEntrySizeBytes)
+
+                // 256KB approximate max size for LogEntry in GCP quotas: https://cloud.google.com/logging/quotas
+                // using 250KB here to be safe
+                if (logEntry.CalculateSize() <= 250000)
                     entries.Add(logEntry);
                 else
                     Debugging.SelfLog.WriteLine("Log entry is too large for Google Cloud Logging: {0}", GetLogEntryMessage(logEntry));
@@ -102,7 +102,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 jsonPayload.Fields.Add("properties", Value.ForStruct(propStruct));
                 foreach (var property in evnt.Properties)
                 {
-                    _logFormatter.WritePropertyAsJson(log, propStruct, property.Key, property.Value);
+                    _logFormatter.WritePropertyAsJson(propStruct, property.Key, property.Value);
                     HandleSpecialProperty(log, property.Key, property.Value);
                 }
 
