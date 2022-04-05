@@ -2,9 +2,8 @@
 
 Serilog sink that writes events to [Google Cloud Logging](https://cloud.google.com/logging/).
 
-Built for `net6.0`, `net5.0`, `netstandard2.0`
-
-Release notes here: [CHANGELOG.md](CHANGELOG.md)
+-   Built for `net6.0`, `net5.0`, `netstandard2.0`
+-   [Release Notes](CHANGELOG.md)
 
 ## Usage
 
@@ -14,19 +13,18 @@ Release notes here: [CHANGELOG.md](CHANGELOG.md)
 dotnet add package Serilog.Sinks.GoogleCloudLogging
 ```
 
-#### Configure Logger (using code):
+#### Configure in code:
 
 ```csharp
-var config = new GoogleCloudLoggingSinkOptions { ProjectId = "YOUR_PROJECT_ID", UseJsonOutput = true };
+var config = new GoogleCloudLoggingSinkOptions { ProjectId = "YOUR_PROJECT_ID" };
 Log.Logger = new LoggerConfiguration().WriteTo.GoogleCloudLogging(config).CreateLogger();
 ```
 
-#### Configure Logger (using config file):
+#### Or configure with config file:
 
 This requires the [`serilog-settings-configuration`](https://github.com/serilog/serilog-settings-configuration) package.
 
 ```json
-// appsettings.json or other config file
 "Serilog": {
   "Using": [ "Serilog.Sinks.GoogleCloudLogging" ],
   "MinimumLevel": "Information",
@@ -34,66 +32,64 @@ This requires the [`serilog-settings-configuration`](https://github.com/serilog/
     {
       "Name": "GoogleCloudLogging",
       "Args": {
-        "projectID": "YOUR_PROJECT_ID",
-        "useJsonOutput": "true",
-        "resourceType": "k8s_cluster",
-        "resourceLabels": {
-          "project_id": "PROJECT-ID-HERE-12345",
-          "location": "LOCATION-STRING-HERE-region-name",
-          "cluster_name": "CLUSTER-NAME-HERE-container-cluster"
-        },
-        "restrictedToMinimumLevel": "Warning"
+        "projectID": "PROJECT-ID-12345",
+        "useSourceContextAsLogName": true,
+        "restrictedToMinimumLevel": "Information",
+        "labels": {
+          "foo": "bar"
+        }
       }
     }
   ]
 }
 ```
+
 ```csharp
 var config = new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: true, reloadOnChange: true).Build();
 Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(config).CreateLogger();
 ```
 
-## GCP Authentication:
+## GCP Integration
 
-This library uses the [Google Cloud .NET](https://cloud.google.com/dotnet/docs) client libraries which authenticate using the [Application Default Credentials](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application) found on the host. This is automatic on Google Cloud (GCE, GKE, Cloud Run, AppEngine) or you can use the [gcloud SDK](https://cloud.google.com/sdk/) to authenticate manually. 
+### Authentication
 
-The service account requires the [`Logs Writer`](https://cloud.google.com/logging/docs/access-control) permission to send logs.
+This library uses the [Google Cloud .NET](https://cloud.google.com/dotnet/docs) client and [Application Default Credentials](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application). The [`Logs Writer`](https://cloud.google.com/logging/docs/access-control) permission is required to send logs. There are several different ways to set credentials:
+
+-   GCE, GKE, Cloud Run, AppEngine and other managed services will have the Application Default Credentials set to the active service account for the resource and can be used without any additional configuration.
+-   Authenticate manually with the [gcloud SDK](https://cloud.google.com/sdk/) on a server to set the Application Default Credentials.
+-   Set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to specify the path to your JSON credentials file.
+-   Set the `GoogleCredentialJson` config option to pass in the contents of your JSON credentials file.
+
+### Log Output
+
+-   Serilog is designed for **[structured logging](https://github.com/serilog/serilog/wiki/Structured-Data)** which is fully supported by Google Cloud. Logs are sent as a JSON object (`JsonPayload` in the protobuf API) with labels, properties, metadata and any other data like stack traces automatically attached.
+-   **Numeric values in labels and properties will be converted to `double` during serialization** because that is the only numeric type supported by JSON. Large integers and floating-point values will lose precision. If you want the exact value preserved then log it as a string instead.
+-   View logs in the GCP Logs Explorer: https://console.cloud.google.com/logs/viewer
 
 ## Sink Options
 
-Name | Default | Description
----- | ------- | -----------
-`ProjectId` | | Google Cloud project ID where logs will be sent. Will be automatically set to host project if running in GCP, otherwise required.
-`ResourceType` | `"global"` | Resource type for all log output. Will be automatically discovered if running in GCP, otherwise required. See [Monitored Resources and Services](https://cloud.google.com/logging/docs/api/v2/resource-list) for supported types.
-`LogName` | `"Default"` | Name of the log.
-`Labels` | | `Dictionary<string, string>` of properties added to all log entries.
-`ResourceLabels` | | `Dictionary<string, string>` of properties added to all log entries, at the resource level. See [Monitored Resources and Services](https://cloud.google.com/logging/docs/api/v2/resource-list) for recognized labels.
-`UseSourceContextAsLogName` | True | The log name for a log entry will be set to the [SourceContext](https://github.com/serilog/serilog/wiki/Writing-Log-Events#source-contexts) property if available.
-`UseJsonOutput` | False | Serialize log entries as JSON for structured logging. See details below.
-`UseLogCorrelation` | False | Integrate logs with [Cloud Trace](https://cloud.google.com/trace) by setting `Trace`, `SpanId`, `TraceSampled` properties if available.
-`ServiceName` | | Name of the service added as metadata to log entries. Required to forward logged exceptions to Google Cloud Error Reporting. Must also set `UseJsonOutput` to true.
-`ServiceVersion` | | Version of the service added as metadata to log entries.
-`GoogleCredentialJson` | | GCP client libraries use [Application Default Credentials](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application). If these are not available or you need to use other credentials, set the content of a JSON credential file directly.
+| Option                    | Description                                                                                                                                                                                                             |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ProjectId                 | ID (not name) of GCP project where logs will be sent. Optional if running in GCP. Required if running elsewhere or to override the destination.                                                                         |
+| ResourceType              | Resource type for logs. Automatically identified if running in GCP or will default to "global". See [Monitored Resources and Services](https://cloud.google.com/logging/docs/api/v2/resource-list) for supported types. |
+| LogName                   | Name of the log. Default is "Default", or will use `SourceContext` is setting is enabled.                                                                                                                               |
+| Labels                    | Optional `Dictionary<string, string>` labels added to all log entries.                                                                                                                                                  |
+| ResourceLabels            | Optional `Dictionary<string, string>` labels added to all log entries, for the resource type. See [Monitored Resources and Services](https://cloud.google.com/logging/docs/api/v2/resource-list) for recognized labels. |
+| ServiceName               | Name of the service added as metadata to log entries. Required for logged exceptions to be forwarded to StackDriver Error Reporting.                                                                                    |
+| ServiceVersion            | Version of the service added as metadata to log entries. Required for logged exceptions to be forwarded to StackDriver Error Reporting.                                                                                 |
+| UseSourceContextAsLogName | The log name for a log entry will be set to the [SourceContext](https://github.com/serilog/serilog/wiki/Writing-Log-Events#source-contexts) property if available. Default is `true`.                                   |
+| UseLogCorrelation         | Integrate logs with [Cloud Trace](https://cloud.google.com/trace) by setting `Trace`, `SpanId`, `TraceSampled` properties if available. Default is `true`.                                                              |
+| GoogleCredentialJson      | Override [Application Default Credentials](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application) with the content of a JSON credential file.                               |
 
-## Logging Output
-
-Serilog uses structured logging but logs are sent to GCP as a `TextPayload` with properties serialized to string labels by default. Enable `UseJsonOutput` to send logs as a `JsonPayload` with the proper data types. This provides richer logs with better querying support and will also capture property names even if they have null values.
-
-*NOTE*: JSON output only accepts numeric values as `double` so all numbers will be converted. Large integers and floating-point values will lose precision. If you want the exact value preserved then log it as a string instead.
-
-#### Log Level Mapping
+### Log Level Mapping
 
 This table shows the mapping from Serilog [`LogLevel`](https://github.com/serilog/serilog/wiki/Configuration-Basics#minimum-level) to Google Cloud Logging [`LogSeverity`](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity)
 
-Serilog | Cloud Logging
-------------- | -----------------
-Verbose | Debug
-Debug | Debug
-Information | Info
-Warning | Warning
-Error | Error
-Fatal | Critical
-
-#### Viewing Logs
-
-View and query logs in the Google Cloud Console Logs Explorer: https://console.cloud.google.com/logs/viewer
+| Serilog     | Cloud Logging |
+| ----------- | ------------- |
+| Verbose     | Debug         |
+| Debug       | Debug         |
+| Information | Info          |
+| Warning     | Warning       |
+| Error       | Error         |
+| Fatal       | Critical      |
