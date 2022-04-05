@@ -92,36 +92,22 @@ namespace Serilog.Sinks.GoogleCloudLogging
                 Timestamp = Timestamp.FromDateTimeOffset(evnt.Timestamp)
             };
 
-            if (_sinkOptions.UseJsonOutput)
+            // json output builds up a protobuf object to be serialized in cloud logging
+            var jsonPayload = new Struct();
+            jsonPayload.Fields.Add("message", Value.ForString(_logFormatter.RenderEventMessage(evnt, writer)));
+
+            var propStruct = new Struct();
+            jsonPayload.Fields.Add("properties", Value.ForStruct(propStruct));
+            foreach (var property in evnt.Properties)
             {
-                // json output builds up a protobuf object to be serialized in cloud logging
-                var jsonPayload = new Struct();
-                jsonPayload.Fields.Add("message", Value.ForString(_logFormatter.RenderEventMessage(evnt, writer)));
-
-                var propStruct = new Struct();
-                jsonPayload.Fields.Add("properties", Value.ForStruct(propStruct));
-                foreach (var property in evnt.Properties)
-                {
-                    _logFormatter.WritePropertyAsJson(propStruct, property.Key, property.Value);
-                    HandleSpecialProperty(log, property.Key, property.Value);
-                }
-
-                if (_serviceContext != null)
-                    jsonPayload.Fields.Add("serviceContext", Value.ForStruct(_serviceContext));
-
-                log.JsonPayload = jsonPayload;
+                _logFormatter.WritePropertyAsJson(propStruct, property.Key, property.Value);
+                HandleSpecialProperty(log, property.Key, property.Value);
             }
-            else
-            {
-                // text output is simple stringification
-                log.TextPayload = _logFormatter.RenderEventMessage(evnt, writer);
 
-                foreach (var property in evnt.Properties)
-                {
-                    _logFormatter.WritePropertyAsLabel(log, property.Key, property.Value);
-                    HandleSpecialProperty(log, property.Key, property.Value);
-                }
-            }
+            if (_serviceContext != null)
+                jsonPayload.Fields.Add("serviceContext", Value.ForStruct(_serviceContext));
+
+            log.JsonPayload = jsonPayload;
 
             return log;
         }

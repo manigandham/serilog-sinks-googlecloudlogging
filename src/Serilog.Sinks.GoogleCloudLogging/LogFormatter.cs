@@ -106,34 +106,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
             }
         }
 
-        /// <summary>
-        /// Writes event properties as labels for a GCP log entry.
-        /// GCP log labels are a flat key/value namespace so all child event properties will be prefixed with parent property names "parentkey.childkey" similar to json path.
-        /// </summary>
-        public void WritePropertyAsLabel(LogEntry log, string propKey, LogEventPropertyValue propValue)
-        {
-            switch (propValue)
-            {
-                case ScalarValue scalarValue:
-                    log.Labels.Add(propKey, scalarValue.Value?.ToString() ?? "");
-                    break;
-
-                case SequenceValue sequenceValue:
-                    log.Labels.Add(propKey, String.Join(",", sequenceValue.Elements));
-                    break;
-
-                case StructureValue structureValue when structureValue.Properties.Count > 0:
-                    foreach (var childProperty in structureValue.Properties)
-                        WritePropertyAsLabel(log, $"{propKey}.{childProperty.Name}", childProperty.Value);
-                    break;
-
-                case DictionaryValue dictionaryValue when dictionaryValue.Elements.Count > 0:
-                    foreach (var childProperty in dictionaryValue.Elements)
-                        WritePropertyAsLabel(log, $"{propKey}.{childProperty.Key.Value?.ToString()?.Replace("\"", "")}", childProperty.Value);
-                    break;
-            }
-        }
-
         public static string CreateLogName(string projectId, string name)
         {
             // cache log name to avoid formatting name for every statement
