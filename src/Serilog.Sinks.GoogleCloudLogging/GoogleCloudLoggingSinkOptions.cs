@@ -39,12 +39,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public bool UseSourceContextAsLogName { get; set; }
 
         /// <summary>
-        /// Serialize log entries as JSON objects instead of strings to preserve structure and data types for rich querying.
-        /// Disabled by default. Must be enabled for logged exceptions to be forwarded to StackDriver Error Reporting.
-        /// </summary>
-        public bool UseJsonOutput { get; set; }
-
-        /// <summary>
         /// Integrate logs with Cloud Trace by setting `Trace`, `SpanId`, `TraceSampled` properties on the LogEvent.
         /// Required for Google Cloud Trace Log Correlation.
         /// See https://cloud.google.com/trace/docs/trace-log-integration
@@ -58,7 +52,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
         /// <summary>
         /// Attach service name to log entries (added as `serviceContext.service` metadata in `jsonPayload`).
-        /// Required for logged exceptions to be forwarded to StackDriver Error Reporting. Must enable <see cref="UseJsonOutput"/>.
+        /// Required for logged exceptions to be forwarded to StackDriver Error Reporting.
         /// </summary>
         /// <remarks>
         /// <c>System.Reflection.Assembly.GetExecutingAssembly().GetName().Name</c> is a good value to use.
@@ -67,7 +61,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
         /// <summary>
         /// Attach service version to log entries (added as `serviceContext.version` metadata in `jsonPayload`).
-        /// Required for logged exceptions to be forwarded to StackDriver Error Reporting. Must enable <see cref="UseJsonOutput"/>.
+        /// Required for logged exceptions to be forwarded to StackDriver Error Reporting.
         /// </summary>
         /// <remarks>
         /// <c>System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString()</c> is a good value to use.
@@ -94,10 +88,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// If a log entry includes a `SourceContext` property (usually created from a log created with a context) then it will be used as the name of the log.
         /// Enabled by default. Disable to always use the `LogName` as set.
         /// </param>
-        /// <param name="useJsonOutput">
-        /// Serialize log entries as JSON object instead of strings to preserve structure and data types for rich querying.
-        /// Disabled by default. Must be enabled for logged exceptions to be forwarded to StackDriver Error Reporting.
-        /// </param>
         /// <param name="useLogCorrelation">
         /// Integrate logs with Cloud Trace by setting LogEntry.Trace and LogEntry.SpanId if the LogEvent contains TraceId and SpanId properties.
         /// Required for Google Cloud Trace Log Correlation.
@@ -108,11 +98,11 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// </param>
         /// <param name="serviceName">
         /// Attach service name to log entries (added as `serviceContext.service` metadata in `jsonPayload`).
-        /// Required for logged exceptions to be forwarded to StackDriver Error Reporting. Must enable <see cref="UseJsonOutput"/>.
+        /// Required for logged exceptions to be forwarded to StackDriver Error Reporting.
         /// </param>
         /// <param name="serviceVersion">
         /// Attach service version to log entries (added as `serviceContext.version` metadata in `jsonPayload`).
-        /// Required for logged exceptions to be forwarded to StackDriver Error Reporting. Must enable <see cref="UseJsonOutput"/>.
+        /// Required for logged exceptions to be forwarded to StackDriver Error Reporting.
         /// </param>
         public GoogleCloudLoggingSinkOptions(
             string? projectId = null,
@@ -121,7 +111,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
             Dictionary<string, string>? labels = null,
             Dictionary<string, string>? resourceLabels = null,
             bool useSourceContextAsLogName = true,
-            bool useJsonOutput = false,
             bool useLogCorrelation = true,
             string? googleCredentialJson = null,
             string? serviceName = null,
@@ -140,7 +129,6 @@ namespace Serilog.Sinks.GoogleCloudLogging
                     ResourceLabels[kvp.Key] = kvp.Value;
 
             UseSourceContextAsLogName = useSourceContextAsLogName;
-            UseJsonOutput = useJsonOutput;
             UseLogCorrelation = useLogCorrelation;
             GoogleCredentialJson = googleCredentialJson;
             ServiceName = serviceName;

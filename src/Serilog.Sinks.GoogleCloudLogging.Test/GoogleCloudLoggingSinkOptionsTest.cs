@@ -22,7 +22,6 @@ namespace Serilog.Sinks.GoogleCloudLogging.Test
                     ResourceType = null,
                     ServiceName = null,
                     ServiceVersion = null,
-                    UseJsonOutput = false,
                     UseSourceContextAsLogName = true,
                 });
         }
@@ -36,7 +35,6 @@ namespace Serilog.Sinks.GoogleCloudLogging.Test
                 labels: new Dictionary<string, string> { { "labelKey", "label value" } },
                 resourceLabels: new Dictionary<string, string> { { "resourceKey", "resource value" } },
                 useSourceContextAsLogName: false,
-                useJsonOutput: true,
                 googleCredentialJson: "{}",
                 serviceName: "service-name",
                 serviceVersion: "1.0.1");
@@ -53,7 +51,6 @@ namespace Serilog.Sinks.GoogleCloudLogging.Test
                     ResourceType = "k8s_pod",
                     ServiceName = "service-name",
                     ServiceVersion = "1.0.1",
-                    UseJsonOutput = true,
                     UseSourceContextAsLogName = false,
                 });
         }
