@@ -46,7 +46,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         public bool UseLogCorrelation { get; set; }
 
         /// <summary>
-        /// JSON string of Google Cloud credentials file, otherwise will use Application Default credentials found on host by default.
+        /// Content of Google Cloud JSON credentials file to override using Application Default credentials.
         /// </summary>
         public string? GoogleCredentialJson { get; set; }
 
@@ -77,7 +77,8 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// </param>
         /// <param name="resourceType">
         /// Resource type for logs, one of (https://cloud.google.com/logging/docs/api/v2/resource-list).
-        /// Optional, will be automatically identified if running in GCP or will be set to "global".        /// </param>
+        /// Optional, will be automatically identified if running in GCP or will be set to "global".       
+        /// </param>
         /// <param name="logName">
         /// Name of individual log.
         /// Optional, will use `SourceContext` from Serilog context if available (see other setting) or will be set to "Default".
@@ -94,7 +95,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// See https://cloud.google.com/trace/docs/trace-log-integration
         /// </param>
         /// <param name="googleCredentialJson">
-        /// JSON string of Google Cloud credentials file, otherwise will use Application Default credentials found on host by default.
+        /// Content of Google Cloud JSON credentials file to override using Application Default credentials.
         /// </param>
         /// <param name="serviceName">
         /// Attach service name to log entries (added as `serviceContext.service` metadata in `jsonPayload`).
