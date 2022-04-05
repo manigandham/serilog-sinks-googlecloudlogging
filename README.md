@@ -33,7 +33,6 @@ This requires the [`serilog-settings-configuration`](https://github.com/serilog/
       "Name": "GoogleCloudLogging",
       "Args": {
         "projectID": "PROJECT-ID-12345",
-        "useSourceContextAsLogName": true,
         "restrictedToMinimumLevel": "Information",
         "labels": {
           "foo": "bar"
@@ -48,6 +47,8 @@ This requires the [`serilog-settings-configuration`](https://github.com/serilog/
 var config = new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: true, reloadOnChange: true).Build();
 Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(config).CreateLogger();
 ```
+
+-   Serilog example for .NET 6: https://blog.datalust.co/using-serilog-in-net-6/
 
 ## GCP Integration
 
