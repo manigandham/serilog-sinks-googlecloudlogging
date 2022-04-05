@@ -43,7 +43,6 @@ namespace TestWeb
                 ResourceType = "gce_instance",
                 LogName = "someLogName",
                 UseSourceContextAsLogName = true,
-                UseJsonOutput = true
             };
 
             Log.Logger = new LoggerConfiguration()
