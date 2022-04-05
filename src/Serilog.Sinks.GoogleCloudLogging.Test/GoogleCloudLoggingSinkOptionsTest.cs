@@ -23,6 +23,7 @@ namespace Serilog.Sinks.GoogleCloudLogging.Test
                     ServiceName = null,
                     ServiceVersion = null,
                     UseSourceContextAsLogName = true,
+                    UseLogCorrelation = true,
                 });
         }
 
@@ -35,6 +36,7 @@ namespace Serilog.Sinks.GoogleCloudLogging.Test
                 labels: new Dictionary<string, string> { { "labelKey", "label value" } },
                 resourceLabels: new Dictionary<string, string> { { "resourceKey", "resource value" } },
                 useSourceContextAsLogName: false,
+                useLogCorrelation: false,
                 googleCredentialJson: "{}",
                 serviceName: "service-name",
                 serviceVersion: "1.0.1");
@@ -52,6 +54,7 @@ namespace Serilog.Sinks.GoogleCloudLogging.Test
                     ServiceName = "service-name",
                     ServiceVersion = "1.0.1",
                     UseSourceContextAsLogName = false,
+                    UseLogCorrelation = false
                 });
         }
 

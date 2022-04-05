@@ -40,7 +40,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
 
         /// <summary>
         /// Integrate logs with Cloud Trace by setting `Trace`, `SpanId`, `TraceSampled` properties on the LogEvent.
-        /// Required for Google Cloud Trace Log Correlation.
+        /// Enabled by default. Required for Google Cloud Trace Log Correlation.
         /// See https://cloud.google.com/trace/docs/trace-log-integration
         /// </summary>
         public bool UseLogCorrelation { get; set; }
@@ -91,7 +91,7 @@ namespace Serilog.Sinks.GoogleCloudLogging
         /// </param>
         /// <param name="useLogCorrelation">
         /// Integrate logs with Cloud Trace by setting LogEntry.Trace and LogEntry.SpanId if the LogEvent contains TraceId and SpanId properties.
-        /// Required for Google Cloud Trace Log Correlation.
+        /// Enabled by default. Required for Google Cloud Trace Log Correlation.
         /// See https://cloud.google.com/trace/docs/trace-log-integration
         /// </param>
         /// <param name="googleCredentialJson">
