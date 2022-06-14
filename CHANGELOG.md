@@ -2,6 +2,12 @@
 
 Readme: https://github.com/manigandham/serilog-sinks-googlecloudlogging/blob/master/README.md
 
+## 5.0.0
+
+-   Updated minimum framework target from `netstandard2.0` to `netstandard2.1`.
+-   Updated to new `Google.Cloud.Logging.V2` library which now uses [GAX v4.0.0 with breaking changes, a new GRPC implementation, and now targets .NET Standard 2.1 at minimum](https://cloud.google.com/dotnet/docs/reference/help/breaking-gax4).
+-   Updated nuget references.
+
 ## 4.0.0
 
 -   Removed `UseJsonOutput` option and made JSON the only output type for logging. Serilog and Google Cloud Logging are designed and optimmized for fully structured logging and there is no benefit to basic text logging anymore. You can still log only strings if you need to, however this is not recommended.

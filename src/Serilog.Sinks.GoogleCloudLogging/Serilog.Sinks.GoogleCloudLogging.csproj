@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <PackageVersion>4.0.0</PackageVersion>
+    <PackageVersion>5.0.0</PackageVersion>
     <Description>Serilog sink that writes events to Google Cloud Platform (Stackdriver) Logging.</Description>
     <Authors>Mani Gandham</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
