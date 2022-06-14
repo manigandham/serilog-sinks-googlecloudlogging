@@ -65,6 +65,7 @@ This library uses the [Google Cloud .NET](https://cloud.google.com/dotnet/docs) 
 
 -   Serilog is designed for **[structured logging](https://github.com/serilog/serilog/wiki/Structured-Data)** which is fully supported by Google Cloud. Logs are sent as a JSON object (`JsonPayload` in the protobuf API) with labels, properties, metadata and any other data like stack traces automatically attached.
 -   **Numeric values in labels and properties will be converted to `double` during serialization** because that is the only numeric type supported by JSON. Large integers and floating-point values will lose precision. If you want the exact value preserved then log it as a string instead.
+-   GCP Error Reporting is separate from Cloud Logging and **will automatically capture error messages only if they have an `Exception` attached**. It is _not_ based on log severity level.
 -   View logs in the GCP Logs Explorer: https://console.cloud.google.com/logs/viewer
 
 ## Sink Options
