@@ -36,11 +36,11 @@ public class GoogleCloudLoggingSink : IBatchedLogEventSink
         foreach (var kvp in _sinkOptions.ResourceLabels)
             _resource.Labels[kvp.Key] = kvp.Value;
 
-        _projectId = _sinkOptions.ProjectId ?? (_resource.Labels.TryGetValue("project_id", out string id) ? id : null) ?? "";
-        if (String.IsNullOrWhiteSpace(_projectId))
+        _projectId = _sinkOptions.ProjectId ?? (_resource.Labels.TryGetValue("project_id", out var id) ? id : null) ?? "";
+        if (_projectId.IsNullOrWhiteSpace())
             throw new ArgumentNullException(nameof(_projectId), "Project Id is not provided and could not be automatically discovered.");
 
-        if (String.IsNullOrWhiteSpace(_sinkOptions.LogName))
+        if (_sinkOptions.LogName.IsNullOrWhiteSpace())
             throw new ArgumentNullException(nameof(_sinkOptions.LogName), "Log Name is blank. Check assigned value or unset to use default.");
 
         _logName = LogFormatter.CreateLogName(_projectId, _sinkOptions.LogName);
@@ -48,18 +48,18 @@ public class GoogleCloudLoggingSink : IBatchedLogEventSink
 
         // cache struct for service name and version contextual properties if available
         // these properties are required for any logged exceptions to automatically be picked up by cloud error reporting
-        if (!String.IsNullOrWhiteSpace(_sinkOptions.ServiceName))
+        if (!_sinkOptions.ServiceName.IsNullOrWhiteSpace())
         {
             _serviceContext = new Struct();
             _serviceContext.Fields.Add("service", Value.ForString(_sinkOptions.ServiceName));
-            if (!String.IsNullOrWhiteSpace(_sinkOptions.ServiceVersion))
+            if (!_sinkOptions.ServiceVersion.IsNullOrWhiteSpace())
                 _serviceContext.Fields.Add("version", Value.ForString(_sinkOptions.ServiceVersion));
         }
 
         // logging client for google cloud apis
-        _client = _sinkOptions.GoogleCredentialJson != null
-            ? new LoggingServiceV2ClientBuilder { JsonCredentials = _sinkOptions.GoogleCredentialJson }.Build()
-            : LoggingServiceV2Client.Create();
+        _client = _sinkOptions.GoogleCredentialJson.IsNullOrWhiteSpace()
+            ? LoggingServiceV2Client.Create()
+            : new LoggingServiceV2ClientBuilder { JsonCredentials = _sinkOptions.GoogleCredentialJson }.Build();
     }
 
     public Task EmitBatchAsync(IEnumerable<LogEvent> events)
@@ -117,14 +117,17 @@ public class GoogleCloudLoggingSink : IBatchedLogEventSink
         if (_sinkOptions.UseSourceContextAsLogName && key.Equals("SourceContext", StringComparison.OrdinalIgnoreCase))
             log.LogName = LogFormatter.CreateLogName(_projectId, GetString(value));
 
-        if (_sinkOptions.UseLogCorrelation && key.Equals("TraceId", StringComparison.OrdinalIgnoreCase))
-            log.Trace = $"projects/{_projectId}/traces/{GetString(value)}";
+        if (_sinkOptions.UseLogCorrelation)
+        {
+            if (key.Equals("TraceId", StringComparison.OrdinalIgnoreCase))
+                log.Trace = $"projects/{_projectId}/traces/{GetString(value)}";
 
-        if (_sinkOptions.UseLogCorrelation && key.Equals("SpanId", StringComparison.OrdinalIgnoreCase))
-            log.SpanId = GetString(value);
+            if (key.Equals("SpanId", StringComparison.OrdinalIgnoreCase))
+                log.SpanId = GetString(value);
 
-        if (_sinkOptions.UseLogCorrelation && key.Equals("TraceSampled", StringComparison.OrdinalIgnoreCase))
-            log.TraceSampled = GetBoolean(value);
+            if (key.Equals("TraceSampled", StringComparison.OrdinalIgnoreCase))
+                log.TraceSampled = GetBoolean(value);
+        }
 
         static string GetString(LogEventPropertyValue v) => (v as ScalarValue)?.Value?.ToString() ?? "";
         static bool GetBoolean(LogEventPropertyValue v) => (v as ScalarValue)?.Value is true;

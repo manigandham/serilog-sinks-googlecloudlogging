@@ -101,4 +101,6 @@ public static class GoogleCloudLoggingSinkExtensions
             levelSwitch
         );
     }
+
+    public static bool IsNullOrWhiteSpace(this string? s) => string.IsNullOrWhiteSpace(s);
 }
