@@ -59,7 +59,7 @@ This library uses the [Google Cloud .NET](https://cloud.google.com/dotnet/docs) 
 -   GCE, GKE, Cloud Run, AppEngine and other managed services will have the Application Default Credentials set to the active service account for the resource and can be used without any additional configuration.
 -   Authenticate manually with the [gcloud SDK](https://cloud.google.com/sdk/) on a server to set the Application Default Credentials.
 -   Set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to specify the path to your JSON credentials file.
--   Set the `GoogleCredentialJson` config option to pass in the contents of your JSON credentials file.
+-   Set the `GoogleCredentialJson` config option to pass in a JSON string (the contents of your JSON credentials file).
 
 ### Log Output
 
@@ -81,7 +81,7 @@ This library uses the [Google Cloud .NET](https://cloud.google.com/dotnet/docs) 
 | ServiceVersion            | Version of the service added as metadata to log entries. Required for logged exceptions to be forwarded to StackDriver Error Reporting.                                                                                 |
 | UseSourceContextAsLogName | The log name for a log entry will be set to the [SourceContext](https://github.com/serilog/serilog/wiki/Writing-Log-Events#source-contexts) property if available. Default is `true`.                                   |
 | UseLogCorrelation         | Integrate logs with [Cloud Trace](https://cloud.google.com/trace) by setting `Trace`, `SpanId`, `TraceSampled` properties if available. Default is `true`.                                                              |
-| GoogleCredentialJson      | Override [Application Default Credentials](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application) with the content of a JSON credential file.                               |
+| GoogleCredentialJson      | JSON string to override [Application Default Credentials](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application) (contents of your credential file).                        |
 
 ### Log Level Mapping
 
