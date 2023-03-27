@@ -10,7 +10,7 @@
     <PackageTags>serilog; sink; google cloud; stackdriver; logging;</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/manigandham/serilog-sinks-googlecloudlogging/blob/master/CHANGELOG.md</PackageReleaseNotes>
-    <PackageProjectUrl>https://github.com/manigandham/serilog-sinks-googlecloudlogging</PackageProjectUrl>
+    <PackageProjectUrl>https://manigandham.com/post/serilog-sinks-googlecloudlogging</PackageProjectUrl>
     <RepositoryUrl>https://github.com/manigandham/serilog-sinks-googlecloudlogging</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
