@@ -104,6 +104,18 @@ public class GoogleCloudLoggingSink : IBatchedLogEventSink
             HandleSpecialProperty(log, property.Key, property.Value);
         }
 
+        if (_sinkOptions.UseLogCorrelation)
+        {
+            if (evnt.TraceId.ToString() is { Length: > 0 } traceId)
+            {
+                log.Trace = $"projects/{_projectId}/traces/{traceId}";
+            }
+            if (evnt.SpanId?.ToString() is { Length: > 0 } spanId)
+            {
+                log.SpanId = spanId;
+            }
+        }
+
         if (_serviceContext != null)
             jsonPayload.Fields.Add("serviceContext", Value.ForStruct(_serviceContext));
 
@@ -119,12 +131,6 @@ public class GoogleCloudLoggingSink : IBatchedLogEventSink
 
         if (_sinkOptions.UseLogCorrelation)
         {
-            if (key.Equals("TraceId", StringComparison.OrdinalIgnoreCase))
-                log.Trace = $"projects/{_projectId}/traces/{GetString(value)}";
-
-            if (key.Equals("SpanId", StringComparison.OrdinalIgnoreCase))
-                log.SpanId = GetString(value);
-
             if (key.Equals("TraceSampled", StringComparison.OrdinalIgnoreCase))
                 log.TraceSampled = GetBoolean(value);
         }
