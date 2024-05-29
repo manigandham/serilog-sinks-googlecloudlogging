@@ -24,6 +24,7 @@ public class GoogleCloudLoggingSinkOptionsTest
                 ServiceVersion = null,
                 UseSourceContextAsLogName = true,
                 UseLogCorrelation = true,
+                CustomTopLevelPropertyKeys = new string[0]
             });
     }
 
@@ -39,7 +40,8 @@ public class GoogleCloudLoggingSinkOptionsTest
             useLogCorrelation: false,
             googleCredentialJson: "{}",
             serviceName: "service-name",
-            serviceVersion: "1.0.1");
+            serviceVersion: "1.0.1",
+            customTopLevelPropertyKeys: new[] {"foo", "bar"});
 
         options
             .Should()
@@ -54,7 +56,8 @@ public class GoogleCloudLoggingSinkOptionsTest
                 ServiceName = "service-name",
                 ServiceVersion = "1.0.1",
                 UseSourceContextAsLogName = false,
-                UseLogCorrelation = false
+                UseLogCorrelation = false,
+                CustomTopLevelPropertyKeys = new[] {"foo", "bar"}
             });
     }
 

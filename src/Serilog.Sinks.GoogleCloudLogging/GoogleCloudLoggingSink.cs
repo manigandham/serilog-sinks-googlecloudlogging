@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Api;
@@ -96,9 +97,12 @@ public class GoogleCloudLoggingSink : IBatchedLogEventSink
         var jsonPayload = new Struct();
         jsonPayload.Fields.Add("message", Value.ForString(_logFormatter.RenderEventMessage(evnt, writer)));
 
+        foreach (var customTopLevelProperty in GetCustomTopLevelProperties()) 
+            _logFormatter.WritePropertyAsJson(jsonPayload, customTopLevelProperty.Key, customTopLevelProperty.Value);
+
         var propStruct = new Struct();
         jsonPayload.Fields.Add("properties", Value.ForStruct(propStruct));
-        foreach (var property in evnt.Properties)
+        foreach (var property in GetOtherProperties())
         {
             _logFormatter.WritePropertyAsJson(propStruct, property.Key, property.Value);
             HandleSpecialProperty(log, property.Key, property.Value);
@@ -110,6 +114,16 @@ public class GoogleCloudLoggingSink : IBatchedLogEventSink
         log.JsonPayload = jsonPayload;
 
         return log;
+
+        IEnumerable<KeyValuePair<string, LogEventPropertyValue>> GetCustomTopLevelProperties()
+        {
+            return evnt.Properties.Where(p => _sinkOptions.CustomTopLevelPropertyKeys.Any(c => c.Equals(p.Key, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        IEnumerable<KeyValuePair<string, LogEventPropertyValue>> GetOtherProperties()
+        {
+            return evnt.Properties.Where(p => !_sinkOptions.CustomTopLevelPropertyKeys.Any(c => c.Equals(p.Key, StringComparison.OrdinalIgnoreCase)));
+        }
     }
 
     private void HandleSpecialProperty(LogEntry log, string key, LogEventPropertyValue value)

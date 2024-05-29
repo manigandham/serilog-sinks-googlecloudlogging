@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Serilog.Sinks.GoogleCloudLogging;
 
@@ -69,6 +70,11 @@ public class GoogleCloudLoggingSinkOptions
     public string? ServiceVersion { get; set; }
 
     /// <summary>
+    /// Optional names of properties that should be logged on the top-level, next to 'message'.
+    /// </summary>
+    public string[] CustomTopLevelPropertyKeys { get; set; } = new string[0];
+
+    /// <summary>
     /// Options for Google Cloud Logging
     /// </summary>
     /// <param name="projectId">
@@ -105,6 +111,9 @@ public class GoogleCloudLoggingSinkOptions
     /// Attach service version to log entries (added as `serviceContext.version` metadata in `jsonPayload`).
     /// Required for logged exceptions to be forwarded to StackDriver Error Reporting.
     /// </param>
+    /// <param name="customTopLevelPropertyKeys">
+    /// Optional names of properties that should be logged on the top-level, next to 'message'.
+    /// </param>
     public GoogleCloudLoggingSinkOptions(
         string? projectId = null,
         string? resourceType = null,
@@ -115,7 +124,8 @@ public class GoogleCloudLoggingSinkOptions
         bool useLogCorrelation = true,
         string? googleCredentialJson = null,
         string? serviceName = null,
-        string? serviceVersion = null)
+        string? serviceVersion = null,
+        string[]? customTopLevelPropertyKeys = null)
     {
         ProjectId = projectId;
         ResourceType = resourceType;
@@ -134,5 +144,6 @@ public class GoogleCloudLoggingSinkOptions
         GoogleCredentialJson = googleCredentialJson;
         ServiceName = serviceName;
         ServiceVersion = serviceVersion;
+        CustomTopLevelPropertyKeys = customTopLevelPropertyKeys ?? new string[0];
     }
 }

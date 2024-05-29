@@ -69,6 +69,7 @@ public static class GoogleCloudLoggingSinkExtensions
         string? googleCredentialJson = null,
         string? serviceName = null,
         string? serviceVersion = null,
+        string[]? customTopLevelPropertyKeys = null,
         int? batchSizeLimit = null,
         TimeSpan? period = null,
         int? queueLimit = null,
@@ -87,7 +88,8 @@ public static class GoogleCloudLoggingSinkExtensions
             useLogCorrelation,
             googleCredentialJson,
             serviceName,
-            serviceVersion
+            serviceVersion,
+            customTopLevelPropertyKeys ?? new string[0]
         );
 
         return loggerConfiguration.GoogleCloudLogging(

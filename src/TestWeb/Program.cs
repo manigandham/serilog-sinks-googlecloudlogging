@@ -38,6 +38,7 @@ try
             ResourceType = "gce_instance",
             LogName = "someLogName",
             UseSourceContextAsLogName = true,
+            CustomTopLevelPropertyKeys = ["customProperty1", "customProperty2"]
         };
 
         builder.Host.UseSerilog((ctx, lc) => lc.WriteTo.Console().WriteTo.GoogleCloudLogging(options).MinimumLevel.Is(LogEventLevel.Verbose));
@@ -76,6 +77,12 @@ try
                 { "valueAsMaxDouble", double.MaxValue },
                 { "valueAsMaxDecimal", decimal.MaxValue },
             });
+        
+        _logger.LogInformation(
+            "Test message with default: {@default} and custom properties: {@customProperty1}, {@customProperty2}", 
+            "default-value",
+            "customProperty1-value",
+            "customProperty2-value");
 
         try
         {
