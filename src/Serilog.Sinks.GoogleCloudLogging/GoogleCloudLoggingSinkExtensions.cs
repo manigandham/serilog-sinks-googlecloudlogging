@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Serilog.Configuration;
 using Serilog.Core;
@@ -67,6 +67,7 @@ public static class GoogleCloudLoggingSinkExtensions
         bool useSourceContextAsLogName = true,
         bool useLogCorrelation = true,
         string? googleCredentialJson = null,
+        string? googleCredentialsEnvironmentVariableName = null,
         string? serviceName = null,
         string? serviceVersion = null,
         int? batchSizeLimit = null,
@@ -87,7 +88,8 @@ public static class GoogleCloudLoggingSinkExtensions
             useLogCorrelation,
             googleCredentialJson,
             serviceName,
-            serviceVersion
+            serviceVersion,
+            googleCredentialsEnvironmentVariableName
         );
 
         return loggerConfiguration.GoogleCloudLogging(

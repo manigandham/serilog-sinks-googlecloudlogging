@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -57,9 +57,11 @@ public class GoogleCloudLoggingSink : IBatchedLogEventSink
         }
 
         // logging client for google cloud apis
-        _client = _sinkOptions.GoogleCredentialJson.IsNullOrWhiteSpace()
+        var clientBuilder = CreateBuilderBasedOnCredentials(_sinkOptions);
+
+        _client = clientBuilder == null
             ? LoggingServiceV2Client.Create()
-            : new LoggingServiceV2ClientBuilder { JsonCredentials = _sinkOptions.GoogleCredentialJson }.Build();
+            : clientBuilder.Build();
     }
 
     public Task EmitBatchAsync(IEnumerable<LogEvent> events)
@@ -151,6 +153,27 @@ public class GoogleCloudLoggingSink : IBatchedLogEventSink
         LogEventLevel.Fatal => LogSeverity.Critical,
         _ => LogSeverity.Default
     };
+
+    private static LoggingServiceV2ClientBuilder? CreateBuilderBasedOnCredentials(GoogleCloudLoggingSinkOptions sinkOptions)
+    {
+        string? credentialsFilePath = null;
+        if (!sinkOptions.GoogleCredentialsEnvironmentVariableName.IsNullOrWhiteSpace())
+        {
+            credentialsFilePath = Environment.GetEnvironmentVariable(sinkOptions.GoogleCredentialsEnvironmentVariableName);
+        }
+
+        LoggingServiceV2ClientBuilder? clientBuilder = null;
+        if (!sinkOptions.GoogleCredentialJson.IsNullOrWhiteSpace())
+        {
+            clientBuilder = new LoggingServiceV2ClientBuilder { JsonCredentials = sinkOptions.GoogleCredentialJson };
+        }
+        else if (!credentialsFilePath.IsNullOrWhiteSpace())
+        {
+            clientBuilder = new LoggingServiceV2ClientBuilder { CredentialsPath = credentialsFilePath };
+        }
+
+        return clientBuilder;
+    }
 
     public Task OnEmptyBatchAsync() => Task.CompletedTask;
 }

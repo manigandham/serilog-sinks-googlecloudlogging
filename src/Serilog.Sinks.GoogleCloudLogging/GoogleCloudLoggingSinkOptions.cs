@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Serilog.Sinks.GoogleCloudLogging;
 
@@ -49,6 +49,11 @@ public class GoogleCloudLoggingSinkOptions
     /// Content of Google Cloud JSON credentials file to override using Application Default credentials.
     /// </summary>
     public string? GoogleCredentialJson { get; set; }
+
+    /// <summary>
+    /// File path with Content of Google Cloud JSON credentials to override using Application Default credentials.
+    /// </summary>
+    public string? GoogleCredentialsEnvironmentVariableName { get; set; }
 
     /// <summary>
     /// Attach service name to log entries (added as `serviceContext.service` metadata in `jsonPayload`).
@@ -115,7 +120,8 @@ public class GoogleCloudLoggingSinkOptions
         bool useLogCorrelation = true,
         string? googleCredentialJson = null,
         string? serviceName = null,
-        string? serviceVersion = null)
+        string? serviceVersion = null,
+        string? googleCredentialsEnvironmentVariableName = null)
     {
         ProjectId = projectId;
         ResourceType = resourceType;
@@ -134,5 +140,6 @@ public class GoogleCloudLoggingSinkOptions
         GoogleCredentialJson = googleCredentialJson;
         ServiceName = serviceName;
         ServiceVersion = serviceVersion;
+        GoogleCredentialsEnvironmentVariableName = googleCredentialsEnvironmentVariableName;
     }
 }
