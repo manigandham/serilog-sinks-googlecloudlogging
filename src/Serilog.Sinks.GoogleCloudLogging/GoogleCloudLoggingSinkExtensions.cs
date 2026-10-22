@@ -5,7 +5,6 @@ using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Formatting.Display;
-using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.GoogleCloudLogging;
 
@@ -37,19 +36,18 @@ public static class GoogleCloudLoggingSinkExtensions
     {
         // use provided text formatter or create one from output template 
         // formatter can be null if neither parameters are provided
-        textFormatter ??= !String.IsNullOrWhiteSpace(outputTemplate) ? new MessageTemplateTextFormatter(outputTemplate) : null;
+        textFormatter ??= !String.IsNullOrWhiteSpace(outputTemplate) ? new MessageTemplateTextFormatter(outputTemplate!) : null;
 
-        var batchingOptions = new PeriodicBatchingSinkOptions
+        var batchingOptions = new BatchingOptions
         {
             BatchSizeLimit = batchSizeLimit ?? 100,
-            Period = period ?? TimeSpan.FromSeconds(5),
+            BufferingTimeLimit = period ?? TimeSpan.FromSeconds(5),
             QueueLimit = queueLimit
         };
 
         var sink = new GoogleCloudLoggingSink(sinkOptions, textFormatter);
-        var batchingSink = new PeriodicBatchingSink(sink, batchingOptions);
 
-        return loggerConfiguration.Sink(batchingSink, restrictedToMinimumLevel, levelSwitch);
+        return loggerConfiguration.Sink(sink, batchingOptions, restrictedToMinimumLevel, levelSwitch);
     }
 
     /// <summary>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Api;
@@ -8,13 +9,13 @@ using Google.Api.Gax.Grpc;
 using Google.Cloud.Logging.Type;
 using Google.Cloud.Logging.V2;
 using Google.Protobuf.WellKnownTypes;
+using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
-using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.GoogleCloudLogging;
 
-public class GoogleCloudLoggingSink : IBatchedLogEventSink
+public sealed class GoogleCloudLoggingSink : IBatchedLogEventSink
 {
     private readonly GoogleCloudLoggingSinkOptions _sinkOptions;
     private readonly LoggingServiceV2Client _client;
@@ -24,6 +25,10 @@ public class GoogleCloudLoggingSink : IBatchedLogEventSink
     private readonly LogFormatter _logFormatter;
     private readonly Struct? _serviceContext;
 
+    /// <summary>
+    /// Because batches aren't executed concurrently, we can reuse the stringBuilder
+    /// </summary>
+    private readonly StringBuilder _stringBuilder = new StringBuilder();
 
     public GoogleCloudLoggingSink(GoogleCloudLoggingSinkOptions sinkOptions, ITextFormatter? textFormatter)
     {
@@ -59,13 +64,25 @@ public class GoogleCloudLoggingSink : IBatchedLogEventSink
         // logging client for google cloud apis
         _client = _sinkOptions.GoogleCredentialJson.IsNullOrWhiteSpace()
             ? LoggingServiceV2Client.Create()
-            : new LoggingServiceV2ClientBuilder { JsonCredentials = _sinkOptions.GoogleCredentialJson }.Build();
+            : new LoggingServiceV2ClientBuilder { GoogleCredential = Google.Apis.Auth.OAuth2.CredentialFactory.FromJson<Google.Apis.Auth.OAuth2.GoogleCredential>(_sinkOptions.GoogleCredentialJson) }.Build();
     }
 
-    public Task EmitBatchAsync(IEnumerable<LogEvent> events)
+    //For testing and benchmarking purposes
+    internal GoogleCloudLoggingSink(string projectId, ITextFormatter? textFormatter)
     {
-        using var writer = new StringWriter();
-        var entries = new List<LogEntry>();
+        _projectId = projectId;
+        _logFormatter = new LogFormatter(textFormatter);
+        _sinkOptions = new GoogleCloudLoggingSinkOptions(projectId, useLogCorrelation: true);
+        _client = null!;
+        _resource = null!;
+        _logName = null!;
+    }
+
+    internal List<LogEntry> CreateEventsBatch(IReadOnlyCollection<LogEvent> events)
+    {
+        //writer is used for message template rendering
+        using var writer = new StringWriter(_stringBuilder);
+        var entries = new List<LogEntry>(events.Count);
 
         foreach (var evnt in events)
         {
@@ -79,6 +96,12 @@ public class GoogleCloudLoggingSink : IBatchedLogEventSink
                 Debugging.SelfLog.WriteLine("Log entry is too large for Google Cloud Logging: {0}", GetLogEntryMessage(logEntry));
         }
 
+        return entries;
+    }
+
+    public Task EmitBatchAsync(IReadOnlyCollection<LogEvent> events)
+    {
+        var entries = CreateEventsBatch(events);
         return entries.Count > 0
             ? _client.WriteLogEntriesAsync(_logName, _resource, _sinkOptions.Labels, entries, CancellationToken.None)
             : Task.CompletedTask;
@@ -104,8 +127,33 @@ public class GoogleCloudLoggingSink : IBatchedLogEventSink
             HandleSpecialProperty(log, property.Key, property.Value);
         }
 
+        if (_sinkOptions.UseLogCorrelation)
+        {
+            if (evnt.TraceId.ToString() is { Length: > 0 } traceId)
+            {
+                log.Trace = $"projects/{_projectId}/traces/{traceId}";
+            }
+            if (evnt.SpanId?.ToString() is { Length: > 0 } spanId)
+            {
+                log.SpanId = spanId;
+            }
+        }
+
         if (_serviceContext != null)
             jsonPayload.Fields.Add("serviceContext", Value.ForStruct(_serviceContext));
+
+        // format exception for Google Cloud Error Reporting
+        // see: https://cloud.google.com/error-reporting/docs/formatting-error-messages
+        if (evnt.Exception != null)
+        {
+            //uses exception property to use the same convention as the official NLog implementation target
+            jsonPayload.Fields.Add("exception", Value.ForString(evnt.Exception.ToString()));
+        }
+        else if (evnt.Level >= LogEventLevel.Error)
+        {
+            //To log an error event that is a text message
+            jsonPayload.Fields.Add("@type", Value.ForString("type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent"));
+        }
 
         log.JsonPayload = jsonPayload;
 
@@ -119,12 +167,6 @@ public class GoogleCloudLoggingSink : IBatchedLogEventSink
 
         if (_sinkOptions.UseLogCorrelation)
         {
-            if (key.Equals("TraceId", StringComparison.OrdinalIgnoreCase))
-                log.Trace = $"projects/{_projectId}/traces/{GetString(value)}";
-
-            if (key.Equals("SpanId", StringComparison.OrdinalIgnoreCase))
-                log.SpanId = GetString(value);
-
             if (key.Equals("TraceSampled", StringComparison.OrdinalIgnoreCase))
                 log.TraceSampled = GetBoolean(value);
         }

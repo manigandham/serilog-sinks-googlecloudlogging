@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <PackageVersion>5.0.0</PackageVersion>
+    <PackageVersion>6.0.0-alpha.7</PackageVersion>
     <Description>Serilog sink that writes events to Google Cloud Platform (Stackdriver) Logging.</Description>
     <Authors>Mani Gandham</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -18,7 +18,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <TargetFrameworks>net6.0;net5.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net10.0;net11.0;netstandard2.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -29,14 +29,23 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Cloud.Logging.V2" Version="4.0.0" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+    <PackageReference Include="Google.Cloud.Logging.V2" Version="4.5.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.402">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Serilog" Version="2.11.0" />
-    <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.3.1" />
-    <PackageReference Include="System.Text.Encodings.Web" Version="6.0.0" />
+    <PackageReference Include="Serilog" Version="4.4.0" />
+    <PackageReference Condition="'$(TargetFramework)' == 'net10.0'" Include="System.Text.Encodings.Web" Version="10.0.13" />
+    <PackageReference Condition="'$(TargetFramework)' == 'net9.0'" Include="System.Text.Encodings.Web" Version="10.0.13" />
+    <PackageReference Condition="'$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'netstandard2.0'" Include="System.Text.Encodings.Web" Version="10.0.13" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Serilog.Sinks.GoogleCloudLogging.Benchmark</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Serilog.Sinks.GoogleCloudLogging.Test</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
 
 </Project>
