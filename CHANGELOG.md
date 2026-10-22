@@ -2,6 +2,10 @@
 
 Readme: https://github.com/manigandham/serilog-sinks-googlecloudlogging/blob/master/README.md
 
+## Unreleased
+
+-   Reduced allocations and formatting overhead for sequence properties by building protobuf lists directly.
+
 ## 5.0.0
 
 -   Updated minimum framework target from `netstandard2.0` to `netstandard2.1`.

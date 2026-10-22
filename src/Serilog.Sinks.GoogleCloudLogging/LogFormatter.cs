@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using Google.Cloud.Logging.V2;
@@ -63,55 +62,61 @@ internal partial class LogFormatter
     /// </summary>
     public void WritePropertyAsJson(Struct jsonStruct, string propKey, LogEventPropertyValue propValue)
     {
+        var value = CreatePropertyValue(propValue);
+        if (value != null)
+            jsonStruct.Fields.Add(propKey, value);
+    }
+
+    private Value? CreatePropertyValue(LogEventPropertyValue propValue)
+    {
         switch (propValue)
         {
             case ScalarValue scalarValue when scalarValue.Value is null:
-                jsonStruct.Fields.Add(propKey, Value.ForNull());
-                break;
+                return Value.ForNull();
 
             case ScalarValue scalarValue when scalarValue.Value is bool boolValue:
-                jsonStruct.Fields.Add(propKey, Value.ForBool(boolValue));
-                break;
+                return Value.ForBool(boolValue);
 
             case ScalarValue scalarValue when scalarValue.Value is short or ushort or int or uint or long or ulong or float or double or decimal:
                 // all numbers are converted to double and may lose precision
                 // numbers should be sent as strings if they do not fit in a double
-                jsonStruct.Fields.Add(propKey, Value.ForNumber(Convert.ToDouble(scalarValue.Value)));
-                break;
+                return Value.ForNumber(Convert.ToDouble(scalarValue.Value));
 
             case ScalarValue scalarValue when scalarValue.Value is string stringValue:
-                jsonStruct.Fields.Add(propKey, Value.ForString(stringValue));
-                break;
+                return Value.ForString(stringValue);
 
             case ScalarValue scalarValue:
                 // handle all other scalar values as strings
-                jsonStruct.Fields.Add(propKey, Value.ForString(scalarValue.Value?.ToString() ?? ""));
-                break;
+                return Value.ForString(scalarValue.Value?.ToString() ?? "");
 
             case SequenceValue sequenceValue:
-                var sequenceChild = new Struct();
+                var sequenceChild = new ListValue();
+                sequenceChild.Values.Capacity = sequenceValue.Elements.Count;
                 for (var i = 0; i < sequenceValue.Elements.Count; i++)
-                    WritePropertyAsJson(sequenceChild, i.ToString(), sequenceValue.Elements[i]);
+                {
+                    var element = CreatePropertyValue(sequenceValue.Elements[i]);
+                    if (element != null)
+                        sequenceChild.Values.Add(element);
+                }
 
-                jsonStruct.Fields.Add(propKey, Value.ForList(sequenceChild.Fields.Values.ToArray()));
-                break;
+                return new Value { ListValue = sequenceChild };
 
             case StructureValue structureValue:
                 var structureChild = new Struct();
                 foreach (var childProperty in structureValue.Properties)
                     WritePropertyAsJson(structureChild, childProperty.Name, childProperty.Value);
 
-                jsonStruct.Fields.Add(propKey, Value.ForStruct(structureChild));
-                break;
+                return Value.ForStruct(structureChild);
 
             case DictionaryValue dictionaryValue:
                 var dictionaryChild = new Struct();
                 foreach (var childProperty in dictionaryValue.Elements)
                     WritePropertyAsJson(dictionaryChild, childProperty.Key.Value?.ToString() ?? "", childProperty.Value);
 
-                jsonStruct.Fields.Add(propKey, Value.ForStruct(dictionaryChild));
-                break;
+                return Value.ForStruct(dictionaryChild);
         }
+
+        return null;
     }
 
     public static string CreateLogName(string projectId, string name)

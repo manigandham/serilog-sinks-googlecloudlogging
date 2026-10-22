@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <PackageVersion>6.0.0-alpha.6</PackageVersion>
+    <PackageVersion>6.0.0-alpha.7</PackageVersion>
     <Description>Serilog sink that writes events to Google Cloud Platform (Stackdriver) Logging.</Description>
     <Authors>Mani Gandham</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -18,7 +18,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <TargetFrameworks>net8.0;net9.0;net10.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net10.0;net11.0;netstandard2.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -42,6 +42,9 @@
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>Serilog.Sinks.GoogleCloudLogging.Benchmark</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Serilog.Sinks.GoogleCloudLogging.Test</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
 
